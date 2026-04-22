@@ -13,8 +13,8 @@ class Peserta extends Model
     protected $keyType = 'string';
     public $incrementing = false;
 
-    public function user()
+    public function order()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->hasMany(Order::class);
     }
 }

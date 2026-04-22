@@ -29,183 +29,165 @@
 
         <!-- HERO -->
         <div class="hero animate-up">
-            <div class="hero-badge"><i class="bi bi-lightning-charge-fill"></i> Pemesanan Terbuka</div>
             <h1 class="hero-title">{{ str_replace('-', ' ', config('app.name')) }}</h1>
             <p class="hero-sub">Living Urology: Integrating Future Treatments into the Professional Journey
             </p>
         </div>
 
-        <!-- STEPS -->
-        <div class="steps animate-up delay-1">
-            <div class="step active">
-                <div class="step-dot">1</div>
-                <div class="step-label">Pilih Tiket</div>
-            </div>
-            <div class="step-line"></div>
-            <div class="step">
-                <div class="step-dot">2</div>
-                <div class="step-label">Data Diri</div>
-            </div>
-            <div class="step-line"></div>
-            <div class="step">
-                <div class="step-dot">3</div>
-                <div class="step-label">Pembayaran</div>
-            </div>
-            <div class="step-line"></div>
-            <div class="step">
-                <div class="step-dot">4</div>
-                <div class="step-label">Konfirmasi</div>
-            </div>
-        </div>
+        <form method="POST" action="{{ route('checkout') }}" id="order-form">
+            @csrf
+            <div class="row g-4 pb-5">
+                <input type="hidden" name="event_id" id="input-ticket-id">
+                <input type="hidden" name="qty" id="input-qty">
+                <input type="hidden" name="total" id="input-total">
+                <!-- LEFT: FORM -->
+                <div class="col-lg-7">
 
-        <div class="row g-4 pb-5">
+                    <!-- TICKET SELECTION -->
+                    <div class="form-card animate-up delay-2">
+                        <div class="section-label"><i class="bi bi-ticket-perforated-fill"></i> Pilih Kategori Tiket
+                        </div>
 
-            <!-- LEFT: FORM -->
-            <div class="col-lg-7">
+                        @foreach ($data as $item)
+                            <input type="radio" name="ticket" id="ticket-{{ $item->id }}" class="ticket-option"
+                                value="{{ $item->id }}" data-name="{{ $item->name }}"
+                                data-price="{{ $item->price }}" onchange="updateSummary()" />
 
-                <!-- TICKET SELECTION -->
-                <div class="form-card animate-up delay-2">
-                    <div class="section-label"><i class="bi bi-ticket-perforated-fill"></i> Pilih Kategori Tiket</div>
-
-                    @foreach ($data as $item)
-                        <input type="radio" name="ticket" id="ticket-{{ $item->id }}" class="ticket-option"
-                            value="{{ $item->id }}" data-name="{{ $item->name }}" data-price="{{ $item->price }}"
-                            onchange="updateSummary()" />
-
-                        <label for="ticket-{{ $item->id }}">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div style="flex:1">
-                                    <div class="ticket-name">{{ ucwords($item->name) }}</div>
-                                    <div class="ticket-desc">{!! $item->description !!}</div>
-                                </div>
-                                <div class="d-flex flex-column align-items-end gap-2">
-                                    <div class="check-circle"><i class="bi bi-check"></i></div>
-                                    <div class="ticket-price">
-                                        <span class="currency">Rp</span>
-                                        {{ number_format($item->price, 0, ',', '.') }}
-                                        <span class="period">/orang</span>
+                            <label for="ticket-{{ $item->id }}">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div style="flex:1">
+                                        <div class="ticket-name">{{ ucwords($item->name) }}</div>
+                                        <div class="ticket-desc">{!! $item->description !!}</div>
+                                    </div>
+                                    <div class="d-flex flex-column align-items-end gap-2">
+                                        <div class="check-circle"><i class="bi bi-check"></i></div>
+                                        <div class="ticket-price">
+                                            <span class="currency">Rp</span>
+                                            {{ number_format($item->price, 0, ',', '.') }}
+                                            <span class="period">/orang</span>
+                                        </div>
                                     </div>
                                 </div>
+                            </label>
+                        @endforeach
+
+                        <div style="margin-top:20px">
+                            <label class="form-label">Jumlah Tiket</label>
+                            <div class="d-flex align-items-center">
+                                <div class="qty-stepper">
+                                    <button class="qty-btn" type="button" onclick="changeQty(-1)"><i
+                                            class="bi bi-dash"></i></button>
+                                    <div class="qty-display" id="qty-display">1</div>
+                                    <button class="qty-btn" type="button" onclick="changeQty(1)"><i
+                                            class="bi bi-plus"></i></button>
+                                </div>
+                                {{-- <span style="font-size:.8rem;color:var(--txt-muted);margin-left:14px">Maks. 10 tiket per
+                                    transaksi</span> --}}
                             </div>
-                        </label>
-                    @endforeach
+                        </div>
+                    </div>
 
-                    <div style="margin-top:20px">
-                        <label class="form-label">Jumlah Tiket</label>
-                        <div class="d-flex align-items-center">
-                            <div class="qty-stepper">
-                                <button class="qty-btn" type="button" onclick="changeQty(-1)"><i
-                                        class="bi bi-dash"></i></button>
-                                <div class="qty-display" id="qty-display">1</div>
-                                <button class="qty-btn" type="button" onclick="changeQty(1)"><i
-                                        class="bi bi-plus"></i></button>
+                    <!-- DATA DIRI -->
+                    <div class="form-card animate-up delay-3">
+                        <div class="section-label"><i class="bi bi-person-fill"></i> Data Pemesan</div>
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <label class="form-label">Nama Depan</label>
+                                <div class="input-icon-wrap"><i class="bi bi-person"></i><input type="text"
+                                        class="form-control" placeholder="John" name="first_name" /></div>
                             </div>
-                            {{-- <span style="font-size:.8rem;color:var(--txt-muted);margin-left:14px">Maks. 10 tiket per
-                                transaksi</span> --}}
+                            <div class="col-sm-6">
+                                <label class="form-label">Nama Belakang</label>
+                                <div class="input-icon-wrap"><i class="bi bi-person"></i><input type="text"
+                                        class="form-control" placeholder="Doe" name="last_name" /></div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Alamat Email</label>
+                                <div class="input-icon-wrap"><i class="bi bi-envelope"></i><input type="email"
+                                        class="form-control" placeholder="john@example.com" name="email" /></div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label">Nomor HP / WhatsApp</label>
+                                <div class="input-icon-wrap"><i class="bi bi-phone"></i><input type="tel"
+                                        class="form-control" placeholder="+62 812 xxxx xxxx" name="phone" /></div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label">Tanggal Lahir</label>
+                                <div class="input-icon-wrap"><i class="bi bi-calendar"></i><input type="date"
+                                        class="form-control" name="birthdate" /></div>
+                            </div>
                         </div>
                     </div>
+                </div><!-- /col-lg-7 -->
+
+                <!-- RIGHT: SUMMARY -->
+                <div class="col-lg-5">
+                    <div class="summary-card animate-up delay-2">
+                        <div class="summary-title">
+                            <span>Ringkasan Pesanan</span>
+                            <i class="bi bi-receipt" style="color:var(--orange)"></i>
+                        </div>
+
+                        <div class="event-box">
+                            <div class="ev-lbl">Event</div>
+                            <div class="ev-name">{{ str_replace('-', ' ', config('app.name')) }}</div>
+                            <div class="ev-meta">
+                            </div>
+
+                            <div class="summary-row">
+                                <span class="s-lbl">Kategori Tiket</span>
+                                <span class="s-val" id="sum-ticket">-</span>
+                            </div>
+
+                            <div class="summary-row">
+                                <span class="s-lbl">Jumlah</span>
+                                <span class="s-val" id="sum-qty">-</span>
+                            </div>
+
+                            <div class="summary-row">
+                                <span class="s-lbl">Harga satuan</span>
+                                <span class="s-val" id="sum-unit">-</span>
+                            </div>
+
+                            <div class="summary-row">
+                                <span class="s-lbl">Subtotal</span>
+                                <span class="s-val" id="sum-sub">-</span>
+                            </div>
+
+                            <div class="summary-row" id="promo-row" style="display:none">
+                                <span class="s-lbl" style="color:#4ade80">Diskon Promo</span>
+                                <span class="s-val" style="color:#4ade80" id="sum-disc"></span>
+                            </div>
+
+                            {{-- <div class="summary-row">
+                                <span class="s-lbl">Biaya layanan</span>
+                                <span class="s-val">Rp 25.000</span>
+                            </div> --}}
+
+                            <div class="summary-total">
+                                <div class="tot-lbl">Total Pembayaran</div>
+                                <div class="amount" id="sum-total">-</div>
+                            </div>
+
+                            <button class="btn-submit" id="btn-submit" onclick="handleSubmit()" disabled>
+                                <i class="bi bi-lock-fill me-2"></i>Pilih Tiket Terlebih Dahulu
+                            </button>
+
+                            <div id="empty-summary" style="font-size:.85rem;color:var(--txt-muted);margin-top:10px">
+                                Silakan pilih kategori tiket terlebih dahulu
+                            </div>
+
+                            <div class="guarantee">
+                                <span><i class="bi bi-shield-check"></i> SSL Terenkripsi</span>
+                                <span><i class="bi bi-arrow-counterclockwise"></i> Refund Policy</span>
+                                <span><i class="bi bi-headset"></i> 24/7 Support</span>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
-
-                <!-- DATA DIRI -->
-                <div class="form-card animate-up delay-3">
-                    <div class="section-label"><i class="bi bi-person-fill"></i> Data Pemesan</div>
-                    <div class="row g-3">
-                        <div class="col-sm-6">
-                            <label class="form-label">Nama Depan</label>
-                            <div class="input-icon-wrap"><i class="bi bi-person"></i><input type="text"
-                                    class="form-control" placeholder="John" /></div>
-                        </div>
-                        <div class="col-sm-6">
-                            <label class="form-label">Nama Belakang</label>
-                            <div class="input-icon-wrap"><i class="bi bi-person"></i><input type="text"
-                                    class="form-control" placeholder="Doe" /></div>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Alamat Email</label>
-                            <div class="input-icon-wrap"><i class="bi bi-envelope"></i><input type="email"
-                                    class="form-control" placeholder="john@example.com" /></div>
-                        </div>
-                        <div class="col-sm-6">
-                            <label class="form-label">Nomor HP / WhatsApp</label>
-                            <div class="input-icon-wrap"><i class="bi bi-phone"></i><input type="tel"
-                                    class="form-control" placeholder="+62 812 xxxx xxxx" /></div>
-                        </div>
-                        <div class="col-sm-6">
-                            <label class="form-label">Tanggal Lahir</label>
-                            <div class="input-icon-wrap"><i class="bi bi-calendar"></i><input type="date"
-                                    class="form-control" /></div>
-                        </div>
-                    </div>
-                </div>
-            </div><!-- /col-lg-7 -->
-
-            <!-- RIGHT: SUMMARY -->
-            <div class="col-lg-5">
-                <div class="summary-card animate-up delay-2">
-                    <div class="summary-title">
-                        <span>Ringkasan Pesanan</span>
-                        <i class="bi bi-receipt" style="color:var(--orange)"></i>
-                    </div>
-
-                    <div class="event-box">
-                        <div class="ev-lbl">Event</div>
-                        <div class="ev-name">{{ str_replace('-', ' ', config('app.name')) }}</div>
-                        <div class="ev-meta">
-                        </div>
-
-                        <div class="summary-row">
-                            <span class="s-lbl">Kategori Tiket</span>
-                            <span class="s-val" id="sum-ticket">-</span>
-                        </div>
-
-                        <div class="summary-row">
-                            <span class="s-lbl">Jumlah</span>
-                            <span class="s-val" id="sum-qty">-</span>
-                        </div>
-
-                        <div class="summary-row">
-                            <span class="s-lbl">Harga satuan</span>
-                            <span class="s-val" id="sum-unit">-</span>
-                        </div>
-
-                        <div class="summary-row">
-                            <span class="s-lbl">Subtotal</span>
-                            <span class="s-val" id="sum-sub">-</span>
-                        </div>
-
-                        <div class="summary-row" id="promo-row" style="display:none">
-                            <span class="s-lbl" style="color:#4ade80">Diskon Promo</span>
-                            <span class="s-val" style="color:#4ade80" id="sum-disc"></span>
-                        </div>
-
-                        {{-- <div class="summary-row">
-                            <span class="s-lbl">Biaya layanan</span>
-                            <span class="s-val">Rp 25.000</span>
-                        </div> --}}
-
-                        <div class="summary-total">
-                            <div class="tot-lbl">Total Pembayaran</div>
-                            <div class="amount" id="sum-total">-</div>
-                        </div>
-
-                        <button class="btn-submit" id="btn-submit" onclick="handleSubmit()" disabled>
-                            <i class="bi bi-lock-fill me-2"></i>Pilih Tiket Terlebih Dahulu
-                        </button>
-
-                        <div id="empty-summary" style="font-size:.85rem;color:var(--txt-muted);margin-top:10px">
-                            Silakan pilih kategori tiket terlebih dahulu
-                        </div>
-
-                        <div class="guarantee">
-                            <span><i class="bi bi-shield-check"></i> SSL Terenkripsi</span>
-                            <span><i class="bi bi-arrow-counterclockwise"></i> Refund Policy</span>
-                            <span><i class="bi bi-headset"></i> 24/7 Support</span>
-                        </div>
-                    </div>
-                </div>
-
             </div>
-        </div><!-- /container -->
+        </form>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script>
@@ -301,18 +283,23 @@
                 const selected = getSelectedTicket();
                 if (!selected) return;
 
-                const btn = document.getElementById('btn-submit');
+                const price = parseInt(selected.dataset.price);
+                const ticketId = selected.value;
+                const total = price * qty;
 
+                // isi hidden input
+                document.getElementById('input-ticket-id').value = ticketId;
+                document.getElementById('input-qty').value = qty;
+                document.getElementById('input-total').value = total;
+
+
+                // animasi loading
                 btn.innerHTML =
                     '<i class="bi bi-arrow-repeat me-2" style="animation:spin .7s linear infinite"></i>Memproses…';
                 btn.disabled = true;
-
                 setTimeout(() => {
-                    btn.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>Pesanan Berhasil!';
-                    btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+                    document.getElementById('order-form').submit();
                 }, 2000);
-
-                window.location.href = '/success';
             }
 
             updateSummary();

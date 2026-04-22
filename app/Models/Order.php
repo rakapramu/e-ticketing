@@ -13,4 +13,14 @@ class Order extends Model
 
     protected $keyType = 'string';
     public $incrementing = false;
+
+    public function peserta()
+    {
+        return $this->belongsTo(Peserta::class);
+    }
+
+    public function event()
+    {
+        return $this->belongsTo(Event::class);
+    }
 }

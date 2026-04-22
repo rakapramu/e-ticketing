@@ -46,13 +46,7 @@
                 </div>
                 <div class="success-ring"><i class="bi bi-check-lg"></i></div>
             </div>
-            <h1 class="success-title">Pemesanan Berhasil!</h1>
             {{-- <p class="success-sub">Tiket kamu telah dikonfirmasi. Selamat datang di NovaBeat Festival 2025! 🎉</p> --}}
-            <div class="order-id" onclick="copyOrderId()">
-                <i class="bi bi-hash"></i>
-                <span id="order-id-text">NBF-2025-A7K3M9</span>
-                <i class="bi bi-copy" style="opacity:.5;font-size:.72rem"></i>
-            </div>
         </div>
 
         <!-- TICKET CARD -->
@@ -68,9 +62,9 @@
                         <div style="text-align:right">
                             <div
                                 style="font-size:.7rem;color:rgba(255,255,255,.5);letter-spacing:1px;text-transform:uppercase">
-                                Total Dibayar</div>
+                                ORDER</div>
                             <div style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:#fff"
-                                id="total-paid">Rp 2.525.000</div>
+                                id="total-paid"># {{ $order->order_code }}</div>
                         </div>
                     </div>
                 </div>
@@ -83,24 +77,25 @@
                     <div class="ticket-grid">
                         <div class="ticket-field">
                             <label>Nama Pemesan</label>
-                            <span>John Doe</span>
+                            <span>{{ ucwords($order->peserta->name) }}</span>
                         </div>
                         <div class="ticket-field">
                             <label>Jumlah Tiket</label>
-                            <span id="ticket-qty">2 Tiket</span>
+                            <span id="ticket-qty">{{ $order->qty }} Tiket</span>
                         </div>
                         <div class="ticket-field">
-                            <label>Kategori</label>
-                            <span id="ticket-cat">Premium</span>
-                        </div>
-                        <div class="ticket-field">
-                            <label>Tanggal Event</label>
-                            <span>15–17 Agt 2025</span>
+                            <label>Tanggal Pemesanan</label>
+                            <span>{{ $order->created_at }}</span>
                         </div>
                         <div class="ticket-field">
                             <label>Status</label>
                             <span style="color:var(--green);display:flex;align-items:center;gap:5px"><i
-                                    class="bi bi-circle-fill" style="font-size:.5rem"></i> Confirmed</span>
+                                    class="bi bi-circle-fill" style="font-size:.5rem"></i>
+                                {{ ucwords($order->status) }}</span>
+                        </div>
+                        <div class="ticket-field">
+                            <label>Total</label>
+                            <span id="ticket-qty">Rp. {{ number_format($order->total, 0, ',', '.') }}</span>
                         </div>
                     </div>
 
@@ -125,8 +120,7 @@
             </div>
         </div>
 
-        <!-- INFO GRID -->
-        <div class="info-grid" style="position:relative;z-index:1;max-width:680px;margin:0 auto 24px;">
+        {{-- <div class="info-grid" style="position:relative;z-index:1;max-width:680px;margin:0 auto 24px;">
             <div class="info-card" style="animation-delay:.1s">
                 <div class="info-card-title">Rincian Pembayaran</div>
                 <div class="info-row"><span class="ir-lbl">Metode</span><span class="ir-val">Transfer BCA</span>
@@ -147,7 +141,7 @@
                 <div class="info-row"><span class="ir-lbl">Tanggal Order</span><span class="ir-val"
                         id="order-date">—</span></div>
             </div>
-        </div>
+        </div> --}}
 
         <!-- ACTION BUTTONS -->
         <div class="action-row" style="position:relative;z-index:1;max-width:680px;margin:0 auto 28px;">
@@ -166,7 +160,8 @@
                 <div class="st-item" style="animation-delay:.1s">
                     <div class="st-dot st-dot-1">1</div>
                     <div class="st-title">Cek Email Konfirmasi</div>
-                    <div class="st-desc">E-ticket telah dikirim ke john@example.com. Cek folder spam jika tidak
+                    <div class="st-desc">E-ticket telah dikirim ke {{ $order->peserta->email }}. Cek folder spam jika
+                        tidak
                         ditemukan.</div>
                 </div>
                 <div class="st-item" style="animation-delay:.2s">
@@ -178,7 +173,7 @@
                 <div class="st-item" style="animation-delay:.3s">
                     <div class="st-dot st-dot-3">3</div>
                     <div class="st-title">Registrasi di Venue</div>
-                    <div class="st-desc">Tunjukkan QR Code atau barcode ke petugas di Gate B untuk scan & registrasi
+                    <div class="st-desc">Tunjukkan QR Code atau barcode ke petugas di Gate untuk scan & registrasi
                         masuk.</div>
                 </div>
             </div>
