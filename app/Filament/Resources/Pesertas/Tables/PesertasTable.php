@@ -14,10 +14,10 @@ class PesertasTable
     {
         return $table
             ->columns([
-                TextColumn::make('user.name')
+                TextColumn::make('name')
                     ->label('Nama')
                     ->searchable(),
-                TextColumn::make('user.email')
+                TextColumn::make('email')
                     ->label('Email')
                     ->searchable(),
                 TextColumn::make('no_wa')
