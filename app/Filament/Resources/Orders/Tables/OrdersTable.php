@@ -27,7 +27,13 @@ class OrdersTable
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('status')
-                    ->badge(),
+                    ->badge()
+                    ->getStateUsing(fn($record) => $record->status)
+                    ->color(fn($state) => match ($state) {
+                        'pending' => 'warning',
+                        'success' => 'success',
+                        'failed' => 'danger',
+                    })
             ])
             ->filters([
                 //

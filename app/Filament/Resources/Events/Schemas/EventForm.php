@@ -6,6 +6,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
@@ -17,54 +18,77 @@ class EventForm
     {
         return $schema
             ->components([
-                TextInput::make('name')
-                    ->required(),
-                TextInput::make('price')
-                    ->required()
-                    ->numeric()
-                    ->prefix('Rp.')
-                    ->live()
-                    ->afterStateUpdated(fn(Set $set, Get $get) => self::calculateFinalPrice($set, $get)),
-                MarkdownEditor::make('description')
-                    ->required(),
-                FileUpload::make('foto')
-                    ->image()
-                    ->disk('public')
-                    ->directory('events')
-                    ->visibility('public')
-                    ->required(fn(string $context): bool => $context === 'create')
-                    ->afterStateUpdated(function ($state, $record) {
-                        if ($record && $record->foto && $state !== $record->foto) {
-                            Storage::disk('public')->delete($record->foto);
-                        }
-                    }),
+                Section::make('Detail Event')
+                    ->description('Lengkapi informasi utama event di bawah ini.')
+                    ->schema([
+                        TextInput::make('name')
+                            ->required()
+                            ->columnSpan(2),
 
-                Toggle::make('is_diskon')
-                    ->label('Aktifkan Diskon?')
-                    ->live()
-                    ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                        if (!$state) {
-                            $set('diskon', 0);
-                            self::calculateFinalPrice($set, $get);
-                        }
-                    }),
+                        MarkdownEditor::make('description')
+                            ->required()
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(2),
 
-                TextInput::make('diskon')
-                    ->label('Potongan Harga ($)')
-                    ->numeric()
-                    ->default(0)
-                    ->visible(fn(Get $get): bool => $get('is_diskon')) // Muncul hanya jika is_diskon TRUE
-                    ->live(onBlur: true) // Update saat user selesai mengetik (kehilangan fokus)
-                    ->afterStateUpdated(fn(Set $set, Get $get) => self::calculateFinalPrice($set, $get)),
+                Section::make('Media & Status')
+                    ->schema([
+                        FileUpload::make('foto')
+                            ->image()
+                            ->disk('public')
+                            ->required()
+                            ->imageEditor()
+                            ->columnSpanFull()
+                            ->directory('events')
+                            ->visibility('public')
+                            ->required(fn(string $context): bool => $context === 'create')
+                            ->afterStateUpdated(function ($state, $record) {
+                                if ($record && $record->foto && $state !== $record->foto) {
+                                    Storage::disk('public')->delete($record->foto);
+                                }
+                            }),
+                        Toggle::make('is_active')
+                            ->label('Publikasikan Event')
+                            ->default(false),
+                    ]),
 
-                TextInput::make('final_price')
-                    ->label('Harga Akhir')
-                    ->numeric()
-                    ->prefix('$')
-                    ->readOnly() // User tidak boleh input manual di sini
-                    ->placeholder(fn(Get $get) => $get('price')), // Default ke harga normal jika tidak ada diskon
+                Section::make('Harga & Konfigurasi Diskon')
+                    ->schema([
+                        TextInput::make('price')
+                            ->label('Harga Normal')
+                            ->numeric()
+                            ->prefix('Rp.')
+                            ->required()
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(fn(Set $set, Get $get) => self::calculateFinalPrice($set, $get)),
 
-                Toggle::make('is_active'),
+                        Toggle::make('is_diskon')
+                            ->label('Aktifkan Diskon?')
+                            ->live()
+                            ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                if (!$state) {
+                                    $set('diskon', 0);
+                                    self::calculateFinalPrice($set, $get);
+                                }
+                            }),
+
+                        TextInput::make('diskon')
+                            ->label('Potongan Harga')
+                            ->numeric()
+                            ->prefix('Rp.')
+                            ->default(0)
+                            ->visible(fn(Get $get): bool => $get('is_diskon'))
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(fn(Set $set, Get $get) => self::calculateFinalPrice($set, $get)),
+
+                        TextInput::make('final_price')
+                            ->label('Harga Akhir')
+                            ->numeric()
+                            ->prefix('Rp.')
+                            ->readOnly()
+                            ->placeholder(fn(Get $get) => $get('price')),
+                    ])
+                    ->columns(1)
             ]);
     }
 
