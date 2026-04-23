@@ -51,7 +51,7 @@
                         @foreach ($data as $item)
                             <input type="radio" name="ticket" id="ticket-{{ $item->id }}" class="ticket-option"
                                 value="{{ $item->id }}" data-name="{{ $item->name }}"
-                                data-price="{{ $item->price }}" onchange="updateSummary()" />
+                                data-price="{{ $item->final_price }}" onchange="updateSummary()" />
 
                             <label for="ticket-{{ $item->id }}">
                                 <div class="d-flex justify-content-between align-items-start">
@@ -117,8 +117,8 @@
                             </div>
                             <div class="col-sm-6">
                                 <label class="form-label">NIK</label>
-                                <div class="input-icon-wrap"><i class="bi bi-person"></i>
-                                    <input type="text" class="form-control" placeholder="Doe" name="nik"
+                                <div class="input-icon-wrap"><i class="bi bi-person-vcard"></i>
+                                    <input type="number" class="form-control" placeholder="123621" name="nik"
                                         value="{{ old('nik') }}" />
                                     @error('nik')
                                         <span class="invalid-feedback" role="alert">
