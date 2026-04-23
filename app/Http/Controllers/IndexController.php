@@ -56,7 +56,7 @@ class IndexController extends Controller
 
             $ticket = Event::findOrFail($request->event_id);
 
-            $subtotal = $ticket->price * $request->qty;
+            $subtotal = $ticket->final_price * $request->qty;
             $total = $subtotal;
 
             $orderCode = 'ORD-' . strtoupper(Str::random(8));

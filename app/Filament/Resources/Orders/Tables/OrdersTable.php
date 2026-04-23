@@ -14,26 +14,20 @@ class OrdersTable
     {
         return $table
             ->columns([
-                TextColumn::make('id')
-                    ->label('ID')
+                TextColumn::make('order_code')
+                    ->label('Order Code')
                     ->searchable(),
-                TextColumn::make('peserta_id')
+                TextColumn::make('peserta.name')
+                    ->label('Peserta')
                     ->searchable(),
-                TextColumn::make('event_id')
+                TextColumn::make('event.name')
+                    ->label('Event')
                     ->searchable(),
                 TextColumn::make('total')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('status')
                     ->badge(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
