@@ -63,7 +63,7 @@
                                         <div class="check-circle"><i class="bi bi-check"></i></div>
                                         <div class="ticket-price">
                                             <span class="currency">Rp</span>
-                                            {{ number_format($item->price, 0, ',', '.') }}
+                                            {{ number_format($item->final_price, 0, ',', '.') }}
                                             <span class="period">/orang</span>
                                         </div>
                                     </div>
@@ -93,29 +93,99 @@
                         <div class="row g-3">
                             <div class="col-sm-6">
                                 <label class="form-label">Nama Depan</label>
-                                <div class="input-icon-wrap"><i class="bi bi-person"></i><input type="text"
-                                        class="form-control" placeholder="John" name="first_name" /></div>
+                                <div class="input-icon-wrap"><i class="bi bi-person"></i>
+                                    <input type="text" class="form-control" placeholder="John" name="first_name"
+                                        value="{{ old('first_name') }}" />
+                                    @error('first_name')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
                             </div>
                             <div class="col-sm-6">
                                 <label class="form-label">Nama Belakang</label>
-                                <div class="input-icon-wrap"><i class="bi bi-person"></i><input type="text"
-                                        class="form-control" placeholder="Doe" name="last_name" /></div>
+                                <div class="input-icon-wrap"><i class="bi bi-person"></i>
+                                    <input type="text" class="form-control" placeholder="Doe" name="last_name"
+                                        value="{{ old('last_name') }}" />
+                                    @error('last_name')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
                             </div>
-                            <div class="col-12">
+                            <div class="col-sm-6">
+                                <label class="form-label">NIK</label>
+                                <div class="input-icon-wrap"><i class="bi bi-person"></i>
+                                    <input type="text" class="form-control" placeholder="Doe" name="nik"
+                                        value="{{ old('nik') }}" />
+                                    @error('nik')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
                                 <label class="form-label">Alamat Email</label>
-                                <div class="input-icon-wrap"><i class="bi bi-envelope"></i><input type="email"
-                                        class="form-control" placeholder="john@example.com" name="email" /></div>
+                                <div class="input-icon-wrap"><i class="bi bi-envelope"></i>
+                                    <input type="email" class="form-control" placeholder="john@example.com"
+                                        name="email" value="{{ old('email') }}" />
+                                    @error('email')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
                             </div>
                             <div class="col-sm-6">
                                 <label class="form-label">Nomor HP / WhatsApp</label>
-                                <div class="input-icon-wrap"><i class="bi bi-phone"></i><input type="tel"
-                                        class="form-control" placeholder="+62 812 xxxx xxxx" name="phone" /></div>
+                                <div class="input-icon-wrap"><i class="bi bi-phone"></i>
+                                    <input type="tel" class="form-control" placeholder="+62 812 xxxx xxxx"
+                                        name="phone" value="{{ old('phone') }}" />
+                                    @error('phone')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
                             </div>
                             <div class="col-sm-6">
+                                <label class="form-label">Gelar</label>
+                                <div class="input-icon-wrap">
+                                    <i class="bi bi-phone"></i>
+                                    <select name="gelar_id" class="form-control" id="">
+                                        <option value="" disabled selected>--Pilih Gelar--</option>
+                                        @foreach ($gelar as $item)
+                                            <option value="{{ $item->id }}"
+                                                {{ old('gelar_id') == $item->id ? 'selected' : '' }}>
+                                                {{ ucwords($item->name) }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('gelar_id')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Alamat</label>
+                                <div class="input-icon-wrap"><i class="bi bi-house"></i>
+                                    <textarea name="alamat" id="" class="form-control" cols="2" rows="2">{{ old('alamat') }}</textarea>
+                                    @error('alamat')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+                            {{-- <div class="col-sm-6">
                                 <label class="form-label">Tanggal Lahir</label>
                                 <div class="input-icon-wrap"><i class="bi bi-calendar"></i><input type="date"
                                         class="form-control" name="birthdate" /></div>
-                            </div>
+                            </div> --}}
                         </div>
                     </div>
                 </div><!-- /col-lg-7 -->

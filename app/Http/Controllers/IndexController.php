@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\TicketMail;
 use App\Models\Event;
+use App\Models\Gelar;
 use App\Models\Order;
 use App\Models\Peserta;
 use Illuminate\Http\Request;
@@ -17,7 +18,8 @@ class IndexController extends Controller
     public function index()
     {
         $data = Event::where('is_active', '1')->get();
-        return view('front.index', compact('data'));
+        $gelar = Gelar::get();
+        return view('front.index', compact('data', 'gelar'));
     }
 
     public function checkout(Request $request)
@@ -27,8 +29,10 @@ class IndexController extends Controller
             'last_name' => 'required',
             'email' => 'required',
             'phone' => 'required',
-            'birthdate' => 'required',
-            'event_id' => 'required'
+            'event_id' => 'required',
+            'gelar_id' => 'required',
+            'alamat' => 'required',
+            'nik' => 'required',
         ]);
 
         try {
@@ -42,8 +46,10 @@ class IndexController extends Controller
                     'name' => $request->first_name . ' ' . $request->last_name,
                     'email' => $request->email,
                     'no_wa' => $request->phone,
-                    'tanggal_lahir' => $request->birthdate,
-                    'alamat' => 'NAN'
+                    // 'tanggal_lahir' => $request->birthdate,
+                    'alamat' => $request->alamat,
+                    'nik' => $request->nik,
+                    'gelar_id' => $request->gelar_id
                 ]);
                 $peserta_id = $peserta->id;
             }

@@ -148,9 +148,6 @@
             <button class="btn-action btn-primary-act" onclick="downloadTicket()">
                 <i class="bi bi-download"></i> Download Tiket
             </button>
-            <button class="btn-action btn-blue-act" onclick="window.location.href='scan'">
-                <i class="bi bi-qr-code-scan"></i> Scan & Registrasi
-            </button>
         </div>
 
         <!-- NEXT STEPS -->

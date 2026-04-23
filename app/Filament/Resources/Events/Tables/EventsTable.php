@@ -24,19 +24,16 @@ class EventsTable
                     ->money('IDR', locale: 'id')
                     ->badge()
                     ->color('success'),
+                TextColumn::make('diskon')
+                    ->numeric()
+                    ->badge()
+                    ->money('IDR', locale: 'id')
+                    ->color('danger'),
                 TextColumn::make('is_active')
                     ->numeric()
                     ->badge()
                     ->color(fn($state) => $state ? 'success' : 'danger')
                     ->formatStateUsing(fn($state) => $state ? 'Active' : 'Inactive'),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

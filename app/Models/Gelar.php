@@ -6,20 +6,16 @@ use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
-#[Guarded(['id'])]
-class Peserta extends Model
+#[Guarded('id')]
+class Gelar extends Model
 {
     use HasUuids;
+
     protected $keyType = 'string';
     public $incrementing = false;
 
-    public function order()
+    public function peserta()
     {
-        return $this->hasMany(Order::class);
-    }
-
-    public function gelar()
-    {
-        return $this->belongsTo(Gelar::class);
+        return $this->hasMany(Peserta::class);
     }
 }

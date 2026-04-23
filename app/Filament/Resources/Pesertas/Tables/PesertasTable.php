@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Pesertas\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -14,6 +13,7 @@ class PesertasTable
     {
         return $table
             ->columns([
+                TextColumn::make('nik'),
                 TextColumn::make('name')
                     ->label('Nama')
                     ->searchable(),
@@ -22,20 +22,16 @@ class PesertasTable
                     ->searchable(),
                 TextColumn::make('no_wa')
                     ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('gelar.name')
+                    ->label('Gelar'),
+                TextColumn::make('alamat')
+
             ])
             ->filters([
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                // EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
