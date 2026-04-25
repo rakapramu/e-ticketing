@@ -33,7 +33,11 @@ class OrdersTable
                         'pending' => 'warning',
                         'success' => 'success',
                         'failed' => 'danger',
-                    })
+                    }),
+                // munculkan tanggal format 8 Februaru 2027
+                TextColumn::make('created_at')
+                    ->label('Tanggal Pemesanan')
+                    ->getStateUsing(fn($record) => $record->created_at->format('d F Y'))
             ])
             ->filters([
                 //
