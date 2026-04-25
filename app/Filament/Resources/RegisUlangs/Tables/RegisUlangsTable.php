@@ -4,7 +4,6 @@ namespace App\Filament\Resources\RegisUlangs\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -14,22 +13,17 @@ class RegisUlangsTable
     {
         return $table
             ->columns([
-                TextColumn::make('id')
-                    ->label('ID')
+                TextColumn::make('order.event.name')
+                    ->label('Event')
                     ->searchable(),
                 TextColumn::make('gate.nama')
                     ->searchable(),
-                TextColumn::make('waktu')
-                    ->dateTime()
-                    ->sortable(),
+                TextColumn::make('order.created_at')
+                    ->label('Tanggal Pemesanan')
+                    ->getStateUsing(fn($record) => $record->order->created_at->format('d F Y')),
                 TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->label('Tanggal Registrasi')
+                    ->getStateUsing(fn($record) => $record->created_at->format('d F Y')),
             ])
             ->filters([
                 //

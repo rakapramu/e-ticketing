@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\TicketMail;
 use App\Models\Event;
+use App\Models\Gate;
 use App\Models\Gelar;
 use App\Models\Order;
 use App\Models\Peserta;
@@ -97,6 +98,15 @@ class IndexController extends Controller
         return view('front.success', compact('order', 'qrCode'));
     }
 
+    public function scan($gate)
+    {
+        $gate = Gate::findOrFail($gate);
+        if (!$gate) {
+            abort(404, 'Gate tidak ditemukan.');
+        }
+        return view('front.scan', compact('gate'));
+    }
+
     public function ticket(Order $order)
     {
         $qr = base64_encode(
@@ -111,8 +121,7 @@ class IndexController extends Controller
 
     public function verify(Request $request, $code)
     {
-        $order = Order::with('regisUlang')->where('order_code', $code)->first();
-
+        $order = Order::with('regisUlang', 'peserta')->where('order_code', $code)->first();
         if (!$order) {
             return response()->json([
                 'success' => false,
@@ -135,7 +144,7 @@ class IndexController extends Controller
                     Carbon::parse($order->regisUlang->waktu)->format('H:i:s'),
                 'ticket' => [
                     'name' => 'Sudah Masuk',
-                    'category' => 'Terverifikasi'
+                    'category' => 'Terverifikasi',
                 ]
             ], 422);
         }
@@ -145,6 +154,7 @@ class IndexController extends Controller
 
             $regis = new RegisUlang();
             $regis->order_id = $order->id;
+            $regis->gate_id = $request->gate_id;
             $regis->waktu = Carbon::now();
             $regis->save();
 
@@ -154,7 +164,7 @@ class IndexController extends Controller
                 'success' => true,
                 'message' => 'Registrasi ulang berhasil! Selamat datang.',
                 'ticket' => [
-                    'name' => "Order #" . $order->order_code,
+                    'name' => $order->peserta->name,
                     'category' => "Event : " . $order->event->name,
                 ]
             ]);

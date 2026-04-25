@@ -17,7 +17,6 @@
 
     <link rel="stylesheet" href="{{ asset('front/style.css') }}">
     <style>
-        /* Memastikan area scanner mengikuti wrapper yang sudah Anda buat */
         #reader {
             width: 100% !important;
             border: none !important;
@@ -30,6 +29,57 @@
 
         .hidden {
             display: none !important;
+        }
+
+        .scan-overlay-result {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            z-index: 10;
+            text-align: center;
+            padding: 20px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+        }
+
+        .overlay-success {
+            background: rgba(25, 135, 84, 0.9);
+            color: white;
+        }
+
+        .overlay-error {
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+        }
+
+        .welcome-text {
+            font-size: 1.2rem;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+
+        .participant-name {
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 10px 0;
+            text-transform: uppercase;
+        }
+
+        .status-msg {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .icon-large {
+            font-size: 4rem;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -52,18 +102,16 @@
             <p class="page-sub">Scan QR code atau barcode tiket untuk verifikasi masuk venue.</p>
         </div>
 
-        <div class="mode-tabs">
-            <button class="mode-tab active" id="tab-cam" onclick="switchTab('cam')">
-                <i class="bi bi-camera"></i> Kamera
-            </button>
-            <button class="mode-tab" id="tab-manual" onclick="switchTab('manual')">
-                <i class="bi bi-keyboard"></i> Manual
-            </button>
-        </div>
-
         <div id="panel-cam" class="panel active">
-            <div class="scan-card">
+            <div class="scan-card position-relative">
                 <div class="section-label"><i class="bi bi-camera-fill"></i> Kamera Scanner</div>
+
+                <div id="scan-feedback" class="scan-overlay-result hidden">
+                    <div id="feedback-icon" class="icon-large"></div>
+                    <div id="feedback-welcome" class="welcome-text">Selamat Datang!</div>
+                    <div id="feedback-name" class="participant-name">NAMA PESERTA</div>
+                    <div id="feedback-msg" class="status-msg">Silakan Masuk Venue</div>
+                </div>
 
                 <div class="cam-wrapper">
                     <div id="reader"></div>
@@ -84,163 +132,98 @@
                     <span id="btn-cam-txt">Aktifkan Kamera</span>
                 </button>
             </div>
-
-            <div class="result-card" id="cam-result"></div>
-        </div>
-
-        <div id="panel-manual" class="panel">
-            <div class="scan-card">
-                <div class="section-label"><i class="bi bi-keyboard-fill"></i> Input Manual</div>
-
-                <div class="mb-3">
-                    <label class="form-label">Kode Order / Barcode Tiket</label>
-                    <div class="input-icon-wrap">
-                        <i class="bi bi-upc-scan"></i>
-                        <input type="text" class="form-control" id="manual-code"
-                            placeholder="Contoh: NBF-2025-A7K3M9" oninput="this.value = this.value.toUpperCase()"
-                            onkeydown="if(event.key==='Enter') verifyManual()" />
-                    </div>
-                </div>
-
-                <button class="btn-verify" id="btn-verify" onclick="verifyManual()">
-                    <i class="bi bi-shield-check"></i> Verifikasi Tiket
-                </button>
-            </div>
-
-            <div class="result-card" id="manual-result"></div>
         </div>
     </div>
 
     <script>
-        /* ── Configuration ── */
         const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.content;
         let html5QrCode = null;
         let camActive = false;
-        let scanCooldown = false;
-
-        /* ── Theme Logic ── */
-        const html = document.documentElement;
-        const tIcon = document.getElementById('t-icon');
-        const tLabel = document.getElementById('t-label');
-        let theme = localStorage.getItem('nb-theme') || 'dark';
+        let isProcessing = false; // Mencegah scan ganda saat proses verifikasi
 
         function applyTheme(t) {
-            theme = t;
-            html.setAttribute('data-theme', t);
+            document.documentElement.setAttribute('data-theme', t);
             localStorage.setItem('nb-theme', t);
+            const tIcon = document.getElementById('t-icon');
+            const tLabel = document.getElementById('t-label');
             tIcon.className = t === 'dark' ? 'bi bi-moon-stars-fill t-icon' : 'bi bi-sun-fill t-icon';
             tLabel.textContent = t === 'dark' ? 'Dark Mode' : 'Light Mode';
         }
-        applyTheme(theme);
+        applyTheme(localStorage.getItem('nb-theme') || 'dark');
 
         function toggleTheme() {
-            applyTheme(theme === 'dark' ? 'light' : 'dark');
+            const current = document.documentElement.getAttribute('data-theme');
+            applyTheme(current === 'dark' ? 'light' : 'dark');
         }
 
-        /* ── Tab Logic ── */
-        function switchTab(name) {
-            document.getElementById('tab-cam').classList.toggle('active', name === 'cam');
-            document.getElementById('tab-manual').classList.toggle('active', name === 'manual');
-            document.getElementById('panel-cam').classList.toggle('active', name === 'cam');
-            document.getElementById('panel-manual').classList.toggle('active', name === 'manual');
-            if (name === 'manual' && camActive) stopCamera();
-        }
-
-        /* ── Camera Logic (Html5Qrcode) ── */
         async function toggleCamera() {
-            if (camActive) {
-                stopCamera();
-            } else {
-                startCamera();
-            }
+            camActive ? stopCamera() : await startCamera();
         }
 
         async function startCamera() {
-            const scannerContainer = document.getElementById('reader');
-            const placeholder = document.getElementById('cam-placeholder');
-
             html5QrCode = new Html5Qrcode("reader");
-
             const config = {
-                fps: 10,
+                fps: 15,
                 qrbox: {
                     width: 250,
                     height: 250
                 },
-                aspectRatio: 1.0
+                aspectRatio: 1.0,
+                disableFlip: true
             };
 
             try {
-                placeholder.classList.add('hidden');
-                // Menggunakan kamera belakang (environment) secara default
+                document.getElementById('cam-placeholder').classList.add('hidden');
                 await html5QrCode.start({
                     facingMode: "environment"
                 }, config, onScanSuccess);
-
                 camActive = true;
                 updateCameraUI(true);
             } catch (err) {
-                console.error("Gagal akses kamera:", err);
-                alert("Kamera tidak dapat diakses. Pastikan izin diberikan.");
-                placeholder.classList.remove('hidden');
+                console.error(err);
+                alert("Kamera tidak dapat diakses.");
+                document.getElementById('cam-placeholder').classList.remove('hidden');
             }
         }
 
-        async function stopCamera() {
+        function stopCamera() {
             if (html5QrCode) {
-                await html5QrCode.stop();
-                html5QrCode = null;
+                html5QrCode.stop().then(() => {
+                    html5QrCode = null;
+                    camActive = false;
+                    updateCameraUI(false);
+                    document.getElementById('cam-placeholder').classList.remove('hidden');
+                });
             }
-            camActive = false;
-            updateCameraUI(false);
-            document.getElementById('cam-placeholder').classList.remove('hidden');
         }
 
         function updateCameraUI(isActive) {
-            const statusTxt = document.getElementById('cam-status-txt');
             const statusDiv = document.getElementById('cam-status');
+            const statusTxt = document.getElementById('cam-status-txt');
             const btnIcon = document.getElementById('btn-cam-icon');
             const btnTxt = document.getElementById('btn-cam-txt');
 
-            if (isActive) {
-                statusDiv.classList.add('active');
-                statusTxt.textContent = "Kamera aktif — arahkan ke tiket";
-                btnIcon.className = "bi bi-camera-video-off-fill";
-                btnTxt.textContent = "Matikan Kamera";
-            } else {
-                statusDiv.classList.remove('active');
-                statusTxt.textContent = "Kamera tidak aktif";
-                btnIcon.className = "bi bi-camera-fill";
-                btnTxt.textContent = "Aktifkan Kamera";
+            statusDiv.className = isActive ? 'cam-status active' : 'cam-status';
+            statusTxt.textContent = isActive ? "Kamera aktif — arahkan ke tiket" : "Kamera tidak aktif";
+            btnIcon.className = isActive ? "bi bi-camera-video-off-fill" : "bi bi-camera-fill";
+            btnTxt.textContent = isActive ? "Matikan Kamera" : "Aktifkan Kamera";
+        }
+
+        async function onScanSuccess(decodedText) {
+            if (isProcessing) return;
+            isProcessing = true;
+
+            if (html5QrCode) {
+                html5QrCode.pause();
             }
+
+            playBeep();
+            if (navigator.vibrate) navigator.vibrate(100);
+
+            await verifyCode(decodedText);
         }
 
-        /* ── Scan Handler ── */
-        function onScanSuccess(decodedText) {
-            if (scanCooldown) return;
-
-            scanCooldown = true;
-            // Play sound effect jika perlu
-            // new Audio('/beep.mp3').play();
-
-            document.getElementById('cam-status-txt').textContent = `Terdeteksi: ${decodedText}`;
-            verifyCode(decodedText, document.getElementById('cam-result'));
-
-            // Cooldown agar tidak scan berkali-kali dalam 3 detik
-            setTimeout(() => {
-                scanCooldown = false;
-                if (camActive) document.getElementById('cam-status-txt').textContent =
-                    "Kamera aktif — arahkan ke tiket";
-            }, 3000);
-        }
-
-        /* ── API Verification Logic ── */
-        async function verifyCode(code, resultEl) {
-            code = code.trim().toUpperCase();
-            if (!code) return;
-
-            renderResult(resultEl, 'loading');
-
+        async function verifyCode(code) {
             try {
                 const response = await fetch(`/api/tickets/${encodeURIComponent(code)}/verify`, {
                     method: 'POST',
@@ -250,61 +233,62 @@
                         'X-CSRF-TOKEN': CSRF_TOKEN
                     },
                     body: JSON.stringify({
-                        code: code
+                        code: code,
+                        gate_id: "{{ $gate->id }}"
                     })
                 });
 
                 const data = await response.json();
 
                 if (response.ok && data.success) {
-                    renderResult(resultEl, 'success', data.ticket);
+                    showFeedback('success', data.ticket.name, 'Tiket Berhasil Diverifikasi');
                 } else {
-                    renderResult(resultEl, 'error', null, data.message || 'Tiket tidak valid');
+                    showFeedback('error', 'GAGAL', data.message || 'Tiket Tidak Valid');
                 }
             } catch (err) {
-                renderResult(resultEl, 'error', null, 'Koneksi server terputus.');
+                showFeedback('error', 'KONEKSI ERROR', 'Gagal menghubungi server');
             }
         }
 
-        async function verifyManual() {
-            const codeInput = document.getElementById('manual-code');
-            const btn = document.getElementById('btn-verify');
+        function showFeedback(type, name, msg) {
+            const el = document.getElementById('scan-feedback');
+            const icon = document.getElementById('feedback-icon');
+            const nameEl = document.getElementById('feedback-name');
+            const msgEl = document.getElementById('feedback-msg');
+            const welcomeEl = document.getElementById('feedback-welcome');
 
-            if (!codeInput.value) return;
+            el.className = `scan-feedback scan-overlay-result overlay-${type}`;
+            icon.className = `icon-large bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-shield-fill-x'}`;
+            nameEl.textContent = name;
+            msgEl.textContent = msg;
+            welcomeEl.style.display = type === 'success' ? 'block' : 'none';
 
-            btn.disabled = true;
-            await verifyCode(codeInput.value, document.getElementById('manual-result'));
-            btn.disabled = false;
+            el.classList.remove('hidden');
+
+            setTimeout(() => {
+                el.classList.add('hidden');
+                if (html5QrCode && camActive) {
+                    html5QrCode.resume();
+                }
+
+                isProcessing = false;
+            }, 10000);
         }
 
-        function renderResult(el, state, ticket = null, message = '') {
-            if (state === 'loading') {
-                el.innerHTML =
-                    `<div class="p-3 text-center"><div class="spinner-border spinner-border-sm text-primary"></div> Verifikasi...</div>`;
-            } else if (state === 'success') {
-                el.innerHTML = `
-                    <div class="result-success p-3">
-                        <div class="d-flex align-items-center gap-3">
-                            <i class="bi bi-check-circle-fill fs-2"></i>
-                            <div>
-                                <div class="fw-bold">TIKET VALID</div>
-                                <div class="small">${ticket.name} - ${ticket.category}</div>
-                            </div>
-                        </div>
-                    </div>`;
-            } else {
-                el.innerHTML = `
-                    <div class="result-error p-3">
-                        <div class="d-flex align-items-center gap-3">
-                            <i class="bi bi-x-circle-fill fs-2"></i>
-                            <div>
-                                <div class="fw-bold">GAGAL</div>
-                                <div class="small">${message}</div>
-                            </div>
-                        </div>
-                    </div>`;
-            }
-            el.style.display = 'block';
+        function playBeep() {
+            try {
+                const ctx = new(window.AudioContext || window.webkitAudioContext)();
+                const oscillator = ctx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                oscillator.type = 'sine';
+                oscillator.frequency.value = 880;
+                oscillator.start();
+                gainNode.gain.setValueAtTime(1, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.2);
+                setTimeout(() => oscillator.stop(), 200);
+            } catch (e) {}
         }
     </script>
 </body>

@@ -18,4 +18,9 @@ class RegisUlang extends Model
     {
         return $this->belongsTo(Gate::class);
     }
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
 }

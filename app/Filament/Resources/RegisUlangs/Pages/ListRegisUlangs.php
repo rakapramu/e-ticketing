@@ -16,6 +16,7 @@ class ListRegisUlangs extends ListRecords
     protected static string $resource = RegisUlangResource::class;
 
     public $gate_id = null;
+    public $isServerProcessing = false;
 
     protected function getHeaderActions(): array
     {
@@ -26,6 +27,7 @@ class ListRegisUlangs extends ListRecords
                 ->color('gray')
                 ->action(fn() => null)
                 ->extraAttributes(['wire:click' => '$refresh']),
+
             Action::make('scan_registration')
                 ->label('Scan Barcode')
                 ->icon('heroicon-o-qr-code')
@@ -41,50 +43,52 @@ class ListRegisUlangs extends ListRecords
 
     public function processScan($code)
     {
+        if ($this->isServerProcessing) return;
+        $this->isServerProcessing = true;
+
         if (!$this->gate_id) {
             Notification::make()
                 ->title('Peringatan')
-                ->body('Silakan pilih Gate terlebih dahulu sebelum melakukan scan.')
+                ->body('Silakan pilih Gate terlebih dahulu.')
                 ->warning()
                 ->send();
+            $this->isServerProcessing = false;
             return;
         }
 
-        if (!$code) return;
+        if (!$code) {
+            $this->isServerProcessing = false;
+            return;
+        }
 
-        $order = Order::with('regisUlang')->where('order_code', strtoupper($code))->first();
+        $order = Order::with('regisUlang', 'peserta')->where('order_code', $code)->first();
 
         if (!$order) {
-            Notification::make()->title('Gagal')->body('Kode tidak ditemukan')->danger()->send();
-            return;
+            $result = ['success' => false, 'message' => 'Kode tidak ditemukan', 'name' => 'TIDAK DIKENAL'];
+        } elseif ($order->status !== 'success') {
+            $result = ['success' => false, 'message' => 'Order belum lunas', 'name' => 'BELUM BAYAR'];
+        } elseif ($order->regisUlang) {
+            $result = ['success' => false, 'message' => 'Sudah masuk pd ' . $order->regisUlang->waktu, 'name' => 'SUDAH SCAN'];
+        } else {
+            // Berhasil: Simpan Data
+            RegisUlang::create([
+                'order_id' => $order->id,
+                'gate_id'  => $this->gate_id,
+                'waktu'    => Carbon::now()
+            ]);
+
+            $result = [
+                'success' => true,
+                'name' => $order->peserta->name,
+                'message' => 'Silakan Masuk Venue'
+            ];
+
+            $this->dispatch('refresh-table');
         }
 
-        if ($order->status !== 'success') {
-            Notification::make()->title('Gagal')->body('Order belum dibayar')->warning()->send();
-            return;
-        }
+        // Kirim event balik ke Alpine.js
+        $this->dispatch('scan-processed', result: $result);
 
-        if ($order->regisUlang) {
-            Notification::make()
-                ->title('Perhatian')
-                ->body('Tiket sudah digunakan pada ' . $order->regisUlang->waktu)
-                ->warning()
-                ->send();
-            return;
-        }
-
-        RegisUlang::create([
-            'order_id' => $order->id,
-            'gate_id'  => $this->gate_id,
-            'waktu'    => Carbon::now()
-        ]);
-
-        Notification::make()
-            ->title('Berhasil')
-            ->body('Registrasi Berhasil untuk ' . $order->order_code . ' melalui Gate ' . (Gate::find($this->gate_id)?->name ?? ''))
-            ->success()
-            ->send();
-
-        $this->dispatch('refresh-table');
+        $this->isServerProcessing = false;
     }
 }
