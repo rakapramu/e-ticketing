@@ -13,4 +13,9 @@ class RegisUlang extends Model
 
     protected $keyType = 'string';
     public $incrementing = false;
+
+    public function gate()
+    {
+        return $this->belongsTo(Gate::class);
+    }
 }

@@ -12,3 +12,6 @@ Route::get('scan', function () {
 });
 
 Route::get('ticket/{order}', [IndexController::class, 'ticket'])->name('ticket');
+Route::get('scan/{gate}', function ($gate) {
+    dd($gate);
+})->name('gate');

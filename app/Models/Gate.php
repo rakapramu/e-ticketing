@@ -13,4 +13,9 @@ class Gate extends Model
 
     protected $keyType = 'string';
     public $incrementing = false;
+
+    public function regisUlang()
+    {
+        return $this->hasMany(RegisUlang::class);
+    }
 }

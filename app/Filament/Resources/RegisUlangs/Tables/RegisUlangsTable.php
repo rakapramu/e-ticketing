@@ -17,11 +17,7 @@ class RegisUlangsTable
                 TextColumn::make('id')
                     ->label('ID')
                     ->searchable(),
-                TextColumn::make('peserta_id')
-                    ->searchable(),
-                TextColumn::make('event_id')
-                    ->searchable(),
-                TextColumn::make('gate_id')
+                TextColumn::make('gate.nama')
                     ->searchable(),
                 TextColumn::make('waktu')
                     ->dateTime()
@@ -39,7 +35,7 @@ class RegisUlangsTable
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                // EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
