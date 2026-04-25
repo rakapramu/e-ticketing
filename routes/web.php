@@ -10,3 +10,5 @@ Route::get('success/{order}', [IndexController::class, 'success'])->name('succes
 Route::get('scan', function () {
     return view('front.scan');
 });
+
+Route::get('ticket/{order}', [IndexController::class, 'ticket'])->name('ticket');

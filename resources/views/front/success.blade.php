@@ -50,7 +50,7 @@
         </div>
 
         <!-- TICKET CARD -->
-        <div class="ticket-wrap">
+        <div class="ticket-wrap" id="ticket-area">
             <div class="ticket-card">
 
                 <!-- BANNER -->
@@ -103,8 +103,7 @@
                     <div class="qr-section">
                         <div>
                             <div class="qr-box">
-                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=NBF-2025-A7K3M9"
-                                    alt="QR Code" width="130px" />
+                                {{ $qrCode }}
                             </div>
                             <div class="scan-hint"><i class="bi bi-qr-code-scan"></i> Scan untuk registrasi</div>
                         </div>
@@ -120,34 +119,24 @@
             </div>
         </div>
 
-        {{-- <div class="info-grid" style="position:relative;z-index:1;max-width:680px;margin:0 auto 24px;">
-            <div class="info-card" style="animation-delay:.1s">
-                <div class="info-card-title">Rincian Pembayaran</div>
-                <div class="info-row"><span class="ir-lbl">Metode</span><span class="ir-val">Transfer BCA</span>
-                </div>
-                <div class="info-row"><span class="ir-lbl">Subtotal</span><span class="ir-val" id="info-sub">Rp
-                        2.500.000</span></div>
-                <div class="info-row"><span class="ir-lbl">Total</span><span class="ir-val orange" id="info-total">Rp
-                        2.525.000</span></div>
-            </div>
+        <div class="info-grid" style="position:relative;z-index:1;max-width:680px;margin:0 auto 24px;">
             <div class="info-card" style="animation-delay:.2s">
-                <div class="info-card-title">Informasi Pengiriman</div>
-                <div class="info-row"><span class="ir-lbl">Email</span><span class="ir-val">john@example.com</span>
+                <div class="info-card-title">Pembayaran dapat dilakukan melalui transfer ke rekenening</div>
+                <div class="info-row"><span class="ir-lbl">A.N</span><span class="ir-val">IAUI Wilayah DI
+                        Yogyakarta</span>
                 </div>
-                <div class="info-row"><span class="ir-lbl">WhatsApp</span><span class="ir-val">+62 812 xxxx
-                        xxxx</span></div>
-                <div class="info-row"><span class="ir-lbl">E-Ticket</span><span class="ir-val green"><i
-                            class="bi bi-check-circle-fill me-1"></i>Terkirim</span></div>
-                <div class="info-row"><span class="ir-lbl">Tanggal Order</span><span class="ir-val"
-                        id="order-date">—</span></div>
+                <div class="info-row"><span class="ir-lbl">Bank</span><span class="ir-val">Bank Syariah Mandiri</span>
+                </div>
+                <div class="info-row"><span class="ir-lbl">No. Rekening</span><span class="ir-val">7446665558</span>
+                </div>
             </div>
-        </div> --}}
+        </div>
 
         <!-- ACTION BUTTONS -->
         <div class="action-row" style="position:relative;z-index:1;max-width:680px;margin:0 auto 28px;">
-            <button class="btn-action btn-primary-act" onclick="downloadTicket()">
+            <a href="{{ route('ticket', $order) }}" class="btn-action btn-primary-act">
                 <i class="bi bi-download"></i> Download Tiket
-            </button>
+            </a>
         </div>
 
         <!-- NEXT STEPS -->
@@ -272,11 +261,6 @@
                 el.textContent = 'Tersalin!';
                 setTimeout(() => el.textContent = prev, 1500);
             });
-        }
-
-        /* ── DOWNLOAD TICKET (open print dialog) ── */
-        function downloadTicket() {
-            window.print();
         }
     </script>
 </body>

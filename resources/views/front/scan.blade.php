@@ -5,14 +5,33 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Scan & Registrasi — {{ str_replace('-', ' ', config('app.name')) }}</title>
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
-    <!-- ZXing barcode scanner -->
-    <script src="https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.4/umd/index.min.js"></script>
+
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
     <link rel="stylesheet" href="{{ asset('front/style.css') }}">
+    <style>
+        /* Memastikan area scanner mengikuti wrapper yang sudah Anda buat */
+        #reader {
+            width: 100% !important;
+            border: none !important;
+        }
+
+        #reader video {
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -20,7 +39,6 @@
     <div class="bg-glow bg-glow-1"></div>
     <div class="bg-glow bg-glow-2"></div>
 
-    <!-- THEME TOGGLE -->
     <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
         <i id="t-icon" class="bi bi-moon-stars-fill t-icon"></i>
         <div class="t-pill"></div>
@@ -29,43 +47,31 @@
 
     <div class="container" style="max-width:680px;position:relative;z-index:1;padding-bottom:60px;">
 
-        <!-- HEADER -->
         <div class="page-header">
             <h1 class="page-title">Scan &amp; Registrasi</h1>
-            <p class="page-sub">Scan QR code atau barcode tiket untuk verifikasi dan registrasi masuk venue.</p>
-        </div>
-        <!-- MODE TABS -->
-        <div class="mode-tabs">
-            <button class="mode-tab active" id="tab-cam" onclick="switchTab('cam')"> <i class="bi bi-camera"></i>
-                Kamera</button>
-            <button class="mode-tab" id="tab-manual" onclick="switchTab('manual')"><i class="bi bi-keyboard"></i>
-                Manual</button>
+            <p class="page-sub">Scan QR code atau barcode tiket untuk verifikasi masuk venue.</p>
         </div>
 
-        <!-- ── PANEL: CAMERA ── -->
+        <div class="mode-tabs">
+            <button class="mode-tab active" id="tab-cam" onclick="switchTab('cam')">
+                <i class="bi bi-camera"></i> Kamera
+            </button>
+            <button class="mode-tab" id="tab-manual" onclick="switchTab('manual')">
+                <i class="bi bi-keyboard"></i> Manual
+            </button>
+        </div>
+
         <div id="panel-cam" class="panel active">
             <div class="scan-card">
                 <div class="section-label"><i class="bi bi-camera-fill"></i> Kamera Scanner</div>
 
-                <div class="cam-wrapper" id="cam-wrapper">
-                    <video id="cam-video" autoplay muted playsinline></video>
-                    <div class="cam-overlay"></div>
-                    <div class="scan-line" id="scan-line" style="display:none"></div>
-                    <div class="corner tl"></div>
-                    <div class="corner tr"></div>
-                    <div class="corner bl"></div>
-                    <div class="corner br"></div>
+                <div class="cam-wrapper">
+                    <div id="reader"></div>
+
                     <div class="cam-placeholder" id="cam-placeholder">
                         <i class="bi bi-camera-off"></i>
                         <div>Klik tombol di bawah untuk<br>mengaktifkan kamera</div>
                     </div>
-                </div>
-
-                <!-- camera device selector -->
-                <div style="margin-top:14px;display:none" id="cam-select-wrap">
-                    <label class="form-label">Pilih Kamera</label>
-                    <select class="form-control" id="cam-select" onchange="switchCamera()"
-                        style="padding:10px 14px !important;border-radius:10px !important;"></select>
                 </div>
 
                 <div class="cam-status" id="cam-status">
@@ -79,11 +85,9 @@
                 </button>
             </div>
 
-            <!-- result -->
             <div class="result-card" id="cam-result"></div>
         </div>
 
-        <!-- ── PANEL: MANUAL ── -->
         <div id="panel-manual" class="panel">
             <div class="scan-card">
                 <div class="section-label"><i class="bi bi-keyboard-fill"></i> Input Manual</div>
@@ -98,41 +102,27 @@
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Nama Pemesan (Opsional)</label>
-                    <div class="input-icon-wrap">
-                        <i class="bi bi-person"></i>
-                        <input type="text" class="form-control" id="manual-name" placeholder="John Doe" />
-                    </div>
-                </div>
-
-                <button class="btn-verify" onclick="verifyManual()">
+                <button class="btn-verify" id="btn-verify" onclick="verifyManual()">
                     <i class="bi bi-shield-check"></i> Verifikasi Tiket
                 </button>
             </div>
 
             <div class="result-card" id="manual-result"></div>
         </div>
-    </div><!-- /container -->
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        /* ══════════════════════════════════════
-               GLOBAL STATE (WAJIB DI ATAS)
-            ══════════════════════════════════════ */
-        let codeReader = null;
+        /* ── Configuration ── */
+        const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.content;
+        let html5QrCode = null;
         let camActive = false;
-        let scanDone = false;
+        let scanCooldown = false;
 
-        /* ══════════════════════════════════════
-           THEME
-        ══════════════════════════════════════ */
+        /* ── Theme Logic ── */
         const html = document.documentElement;
         const tIcon = document.getElementById('t-icon');
         const tLabel = document.getElementById('t-label');
-
         let theme = localStorage.getItem('nb-theme') || 'dark';
-        applyTheme(theme);
 
         function applyTheme(t) {
             theme = t;
@@ -141,89 +131,22 @@
             tIcon.className = t === 'dark' ? 'bi bi-moon-stars-fill t-icon' : 'bi bi-sun-fill t-icon';
             tLabel.textContent = t === 'dark' ? 'Dark Mode' : 'Light Mode';
         }
+        applyTheme(theme);
 
         function toggleTheme() {
             applyTheme(theme === 'dark' ? 'light' : 'dark');
         }
 
-        /* ══════════════════════════════════════
-           TABS (FIX: NO HIST)
-        ══════════════════════════════════════ */
+        /* ── Tab Logic ── */
         function switchTab(name) {
-            ['cam', 'manual'].forEach(t => {
-                document.getElementById('tab-' + t).classList.toggle('active', t === name);
-                document.getElementById('panel-' + t).classList.toggle('active', t === name);
-            });
+            document.getElementById('tab-cam').classList.toggle('active', name === 'cam');
+            document.getElementById('tab-manual').classList.toggle('active', name === 'manual');
+            document.getElementById('panel-cam').classList.toggle('active', name === 'cam');
+            document.getElementById('panel-manual').classList.toggle('active', name === 'manual');
+            if (name === 'manual' && camActive) stopCamera();
         }
 
-        /* ══════════════════════════════════════
-           MOCK DATABASE
-        ══════════════════════════════════════ */
-        const db = {
-            'NBF-2025-A7K3M9': {
-                name: 'John Doe',
-                category: 'Premium',
-                qty: 2,
-                status: 'valid'
-            },
-            'NBF-2025-B3X9K1': {
-                name: 'Siti Rahayu',
-                category: 'VIP Diamond',
-                qty: 1,
-                status: 'valid'
-            },
-            'NBF-2025-C5Y2L4': {
-                name: 'Budi Santoso',
-                category: 'Regular',
-                qty: 3,
-                status: 'valid'
-            },
-            'NBF-2025-D1Z8M7': {
-                name: 'Dewi Anggraini',
-                category: 'Premium',
-                qty: 1,
-                status: 'used'
-            },
-        };
-
-        /* ══════════════════════════════════════
-           VERIFY
-        ══════════════════════════════════════ */
-        function verifyCode(code, resultEl) {
-            code = code.trim().toUpperCase();
-            const ticket = db[code];
-
-            if (!ticket) {
-                resultEl.innerHTML = `<div style="color:red">Tiket tidak ditemukan</div>`;
-                return;
-            }
-
-            if (ticket.status === 'used') {
-                resultEl.innerHTML = `<div style="color:red">Tiket sudah digunakan</div>`;
-                return;
-            }
-
-            ticket.status = 'used';
-
-            resultEl.innerHTML = `
-                <div style="color:lime">
-                    ✔ ${ticket.name} (${ticket.category})<br>
-                    ${ticket.qty} tiket
-                </div>
-            `;
-        }
-
-        /* ══════════════════════════════════════
-           MANUAL INPUT
-        ══════════════════════════════════════ */
-        function verifyManual() {
-            const code = document.getElementById('manual-code').value;
-            verifyCode(code, document.getElementById('manual-result'));
-        }
-
-        /* ══════════════════════════════════════
-           CAMERA (NO ZXING - SAFE MODE)
-        ══════════════════════════════════════ */
+        /* ── Camera Logic (Html5Qrcode) ── */
         async function toggleCamera() {
             if (camActive) {
                 stopCamera();
@@ -233,47 +156,155 @@
         }
 
         async function startCamera() {
+            const scannerContainer = document.getElementById('reader');
+            const placeholder = document.getElementById('cam-placeholder');
+
+            html5QrCode = new Html5Qrcode("reader");
+
+            const config = {
+                fps: 10,
+                qrbox: {
+                    width: 250,
+                    height: 250
+                },
+                aspectRatio: 1.0
+            };
+
             try {
-                const video = document.getElementById('cam-video');
-
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        facingMode: "environment"
-                    }
-                });
-
-                video.srcObject = stream;
+                placeholder.classList.add('hidden');
+                // Menggunakan kamera belakang (environment) secara default
+                await html5QrCode.start({
+                    facingMode: "environment"
+                }, config, onScanSuccess);
 
                 camActive = true;
-
-                document.getElementById('cam-placeholder').classList.add('hidden');
-                document.getElementById('scan-line').style.display = 'block';
-                document.getElementById('cam-status').className = 'cam-status active';
-                document.getElementById('cam-status-txt').textContent = 'Kamera aktif';
-
-                document.getElementById('btn-cam-txt').textContent = 'Matikan Kamera';
-
+                updateCameraUI(true);
             } catch (err) {
-                console.error(err);
-                alert('Kamera tidak bisa diakses: ' + err.message);
+                console.error("Gagal akses kamera:", err);
+                alert("Kamera tidak dapat diakses. Pastikan izin diberikan.");
+                placeholder.classList.remove('hidden');
             }
         }
 
-        function stopCamera() {
-            const video = document.getElementById('cam-video');
-
-            if (video.srcObject) {
-                video.srcObject.getTracks().forEach(track => track.stop());
-                video.srcObject = null;
+        async function stopCamera() {
+            if (html5QrCode) {
+                await html5QrCode.stop();
+                html5QrCode = null;
             }
-
             camActive = false;
-
+            updateCameraUI(false);
             document.getElementById('cam-placeholder').classList.remove('hidden');
-            document.getElementById('scan-line').style.display = 'none';
-            document.getElementById('cam-status').className = 'cam-status';
-            document.getElementById('cam-status-txt').textContent = 'Kamera tidak aktif';
-            document.getElementById('btn-cam-txt').textContent = 'Aktifkan Kamera';
+        }
+
+        function updateCameraUI(isActive) {
+            const statusTxt = document.getElementById('cam-status-txt');
+            const statusDiv = document.getElementById('cam-status');
+            const btnIcon = document.getElementById('btn-cam-icon');
+            const btnTxt = document.getElementById('btn-cam-txt');
+
+            if (isActive) {
+                statusDiv.classList.add('active');
+                statusTxt.textContent = "Kamera aktif — arahkan ke tiket";
+                btnIcon.className = "bi bi-camera-video-off-fill";
+                btnTxt.textContent = "Matikan Kamera";
+            } else {
+                statusDiv.classList.remove('active');
+                statusTxt.textContent = "Kamera tidak aktif";
+                btnIcon.className = "bi bi-camera-fill";
+                btnTxt.textContent = "Aktifkan Kamera";
+            }
+        }
+
+        /* ── Scan Handler ── */
+        function onScanSuccess(decodedText) {
+            if (scanCooldown) return;
+
+            scanCooldown = true;
+            // Play sound effect jika perlu
+            // new Audio('/beep.mp3').play();
+
+            document.getElementById('cam-status-txt').textContent = `Terdeteksi: ${decodedText}`;
+            verifyCode(decodedText, document.getElementById('cam-result'));
+
+            // Cooldown agar tidak scan berkali-kali dalam 3 detik
+            setTimeout(() => {
+                scanCooldown = false;
+                if (camActive) document.getElementById('cam-status-txt').textContent =
+                    "Kamera aktif — arahkan ke tiket";
+            }, 3000);
+        }
+
+        /* ── API Verification Logic ── */
+        async function verifyCode(code, resultEl) {
+            code = code.trim().toUpperCase();
+            if (!code) return;
+
+            renderResult(resultEl, 'loading');
+
+            try {
+                const response = await fetch(`/api/tickets/${encodeURIComponent(code)}/verify`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': CSRF_TOKEN
+                    },
+                    body: JSON.stringify({
+                        code: code
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    renderResult(resultEl, 'success', data.ticket);
+                } else {
+                    renderResult(resultEl, 'error', null, data.message || 'Tiket tidak valid');
+                }
+            } catch (err) {
+                renderResult(resultEl, 'error', null, 'Koneksi server terputus.');
+            }
+        }
+
+        async function verifyManual() {
+            const codeInput = document.getElementById('manual-code');
+            const btn = document.getElementById('btn-verify');
+
+            if (!codeInput.value) return;
+
+            btn.disabled = true;
+            await verifyCode(codeInput.value, document.getElementById('manual-result'));
+            btn.disabled = false;
+        }
+
+        function renderResult(el, state, ticket = null, message = '') {
+            if (state === 'loading') {
+                el.innerHTML =
+                    `<div class="p-3 text-center"><div class="spinner-border spinner-border-sm text-primary"></div> Verifikasi...</div>`;
+            } else if (state === 'success') {
+                el.innerHTML = `
+                    <div class="result-success p-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="bi bi-check-circle-fill fs-2"></i>
+                            <div>
+                                <div class="fw-bold">TIKET VALID</div>
+                                <div class="small">${ticket.name} - ${ticket.category}</div>
+                            </div>
+                        </div>
+                    </div>`;
+            } else {
+                el.innerHTML = `
+                    <div class="result-error p-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="bi bi-x-circle-fill fs-2"></i>
+                            <div>
+                                <div class="fw-bold">GAGAL</div>
+                                <div class="small">${message}</div>
+                            </div>
+                        </div>
+                    </div>`;
+            }
+            el.style.display = 'block';
         }
     </script>
 </body>

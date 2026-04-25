@@ -7,6 +7,9 @@ use App\Models\Event;
 use App\Models\Gelar;
 use App\Models\Order;
 use App\Models\Peserta;
+use App\Models\RegisUlang;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -72,7 +75,6 @@ class IndexController extends Controller
             $qrBase64 = base64_encode(
                 QrCode::format('svg')
                     ->size(250)
-                    ->margin(1)
                     ->generate($orderCode)
             );
 
@@ -91,6 +93,77 @@ class IndexController extends Controller
 
     public function success(Order $order)
     {
-        return view('front.success', compact('order'));
+        $qrCode = QrCode::size(150)->generate($order->order_code);
+        return view('front.success', compact('order', 'qrCode'));
+    }
+
+    public function ticket(Order $order)
+    {
+        $qr = base64_encode(
+            QrCode::format('svg')->size(200)->generate($order->order_code)
+        );
+
+        $pdf = Pdf::loadView('front.pdf.ticket', compact('order', 'qr'))
+            ->setPaper([0, 0, 420, 450], 'portrait');
+
+        return $pdf->download('tiket-' . $order->order_code . '.pdf');
+    }
+
+    public function verify(Request $request, $code)
+    {
+        $order = Order::with('regisUlang')->where('order_code', $code)->first();
+
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode order tidak ditemukan.'
+            ], 404);
+        }
+
+        if ($order->status !== 'success') {
+            $msg = $order->status === 'pending' ? 'Pembayaran masih pending.' : 'Pembayaran gagal/dibatalkan.';
+            return response()->json([
+                'success' => false,
+                'message' => $msg
+            ], 422);
+        }
+
+        if ($order->regisUlang) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Peserta sudah melakukan registrasi ulang pada ' .
+                    Carbon::parse($order->regisUlang->waktu)->format('H:i:s'),
+                'ticket' => [
+                    'name' => 'Sudah Masuk',
+                    'category' => 'Terverifikasi'
+                ]
+            ], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $regis = new RegisUlang();
+            $regis->order_id = $order->id;
+            $regis->waktu = Carbon::now();
+            $regis->save();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Registrasi ulang berhasil! Selamat datang.',
+                'ticket' => [
+                    'name' => "Order #" . $order->order_code,
+                    'category' => "Event : " . $order->event->name,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan sistem saat menyimpan data.'
+            ], 500);
+        }
     }
 }

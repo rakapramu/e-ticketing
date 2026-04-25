@@ -23,4 +23,9 @@ class Order extends Model
     {
         return $this->belongsTo(Event::class);
     }
+
+    public function regisUlang()
+    {
+        return $this->hasOne(RegisUlang::class);
+    }
 }

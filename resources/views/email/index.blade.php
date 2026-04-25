@@ -61,7 +61,8 @@
                             <!-- QR -->
                             <div style="text-align:center;margin:24px 0;">
                                 <div style="background:#fff;padding:12px;border-radius:12px;display:inline-block;">
-                                    <img src="data:image/svg+xml;base64,{{ $qr }}" width="180">
+                                    <img
+                                        src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ $order->order_code }}">
                                 </div>
                                 <p style="font-size:11px;color:#9ca3af;margin-top:10px;">
                                     Scan QR ini saat masuk venue
