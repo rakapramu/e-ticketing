@@ -114,9 +114,9 @@ class IndexController extends Controller
         );
 
         $pdf = Pdf::loadView('front.pdf.ticket', compact('order', 'qr'))
-            ->setPaper([0, 0, 420, 450], 'portrait');
+            ->setPaper([0, 0, 420, 470], 'portrait');
 
-        return $pdf->download('tiket-' . $order->order_code . '.pdf');
+        return $pdf->stream('tiket-' . $order->order_code . '.pdf');
     }
 
     public function scanner($gate)

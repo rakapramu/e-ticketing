@@ -138,6 +138,11 @@
                 </div>
 
                 <div class="row">
+                    <span class="label">Nama Event :</span>
+                    <span class="value">{{ $order->event->name }}</span>
+                </div>
+
+                <div class="row">
                     <span class="label">Nama :</span>
                     <span class="value">{{ $order->peserta->name }}</span>
                 </div>
@@ -166,15 +171,15 @@
 
                 <!-- NOTICE -->
                 <div class="notice">
-                    ⚠️ Tiket hanya berlaku untuk 1x scan<br>
-                    ⚠️ Simpan tiket ini atau screenshot QR
+                    Tiket hanya berlaku untuk 1x scan<br>
+                    Simpan tiket ini atau screenshot QR
                 </div>
 
             </div>
 
             <!-- FOOTER -->
             <div class="footer">
-                © {{ date('Y') }} {{ config('app.name') }} • All rights reserved
+                © {{ date('Y') }} {{ str_replace('-', ' ', config('app.name')) }} • All rights reserved
             </div>
 
         </div>

@@ -47,6 +47,10 @@
                                     <td align="right"><strong>{{ $order->order_code }}</strong></td>
                                 </tr>
                                 <tr>
+                                    <td style="padding:6px 0;color:#000000;">Nama Event</td>
+                                    <td align="right"><strong>{{ $order->event->name }}</strong></td>
+                                </tr>
+                                <tr>
                                     <td style="padding:6px 0;color:#121212;">Jumlah Tiket</td>
                                     <td align="right">{{ $order->qty }}</td>
                                 </tr>
@@ -82,7 +86,7 @@
                     <!-- FOOTER -->
                     <tr>
                         <td style="padding:16px;text-align:center;font-size:11px;color:#6b7280;">
-                            © {{ date('Y') }} Event Anda • All rights reserved
+                            © {{ date('Y') }} {{ str_replace('-', ' ', config('app.name')) }} • All rights reserved
                         </td>
                     </tr>
 
