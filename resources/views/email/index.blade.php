@@ -86,7 +86,7 @@
                     <!-- FOOTER -->
                     <tr>
                         <td style="padding:16px;text-align:center;font-size:11px;color:#6b7280;">
-                            © {{ date('Y') }} {{ str_replace('-', ' ', config('app.name')) }} • All rights reserved
+                            © {{ date('Y') }} JUF • All rights reserved
                         </td>
                     </tr>
 

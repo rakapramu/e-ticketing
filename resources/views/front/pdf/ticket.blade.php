@@ -179,7 +179,7 @@
 
             <!-- FOOTER -->
             <div class="footer">
-                © {{ date('Y') }} {{ str_replace('-', ' ', config('app.name')) }} • All rights reserved
+                © {{ date('Y') }} JUF • All rights reserved
             </div>
 
         </div>
