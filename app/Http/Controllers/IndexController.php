@@ -119,6 +119,15 @@ class IndexController extends Controller
         return $pdf->download('tiket-' . $order->order_code . '.pdf');
     }
 
+    public function scanner($gate)
+    {
+        $gate = Gate::findOrFail($gate);
+        if (!$gate) {
+            abort(404, 'Gate tidak ditemukan.');
+        }
+        return view('front.scanner', compact('gate'));
+    }
+
     public function verify(Request $request, $code)
     {
         $order = Order::with('regisUlang', 'peserta')->where('order_code', $code)->first();

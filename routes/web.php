@@ -9,3 +9,4 @@ Route::post('checkout', [IndexController::class, 'checkout'])->name('checkout');
 Route::get('success/{order}', [IndexController::class, 'success'])->name('success');
 Route::get('ticket/{order}', [IndexController::class, 'ticket'])->name('ticket');
 Route::get('scan/{gate}', [IndexController::class, 'scan'])->name('gate');
+Route::get('scanner/{gate}', [IndexController::class, 'scanner'])->name('scanner');

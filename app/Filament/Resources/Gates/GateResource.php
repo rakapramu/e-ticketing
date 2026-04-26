@@ -56,10 +56,15 @@ class GateResource extends Resource
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
-                Action::make('Open Gate')
+                Action::make('Scan Camera')
                     ->url(fn(Gate $record): string => route('gate', $record->id))
                     ->icon('heroicon-s-link')
                     ->color('primary')
+                    ->openurlInNewTab(),
+                Action::make('Scan Scanner')
+                    ->url(fn(Gate $record): string => route('scanner', $record->id))
+                    ->icon('heroicon-s-link')
+                    ->color('success')
                     ->openurlInNewTab(),
             ])
             ->toolbarActions([
