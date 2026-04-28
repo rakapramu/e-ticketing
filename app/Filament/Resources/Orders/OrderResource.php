@@ -13,6 +13,8 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class OrderResource extends Resource
 {
@@ -21,6 +23,18 @@ class OrderResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $recordTitleAttribute = 'Order';
+
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        if (Auth::user()->hasRole('partisipan')) {
+            return $query->where('peserta_id', Auth::user()->peserta?->id);
+        }
+
+        return $query;
+    }
 
     public static function form(Schema $schema): Schema
     {

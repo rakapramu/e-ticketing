@@ -29,6 +29,11 @@ class Event extends Model
         return $this->hasMany(Order::class);
     }
 
+    public function category()
+    {
+        return $this->belongsTo(CategoryEvent::class, 'category_id');
+    }
+
     public function regisUlang(): HasManyThrough
     {
         return $this->hasManyThrough(

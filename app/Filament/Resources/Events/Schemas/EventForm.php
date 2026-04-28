@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\Events\Schemas;
 
+use App\Models\CategoryEvent;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\MarkdownEditor;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
@@ -24,7 +26,11 @@ class EventForm
                         TextInput::make('name')
                             ->required()
                             ->columnSpan(2),
-
+                        Select::make('category_id')
+                            ->options(CategoryEvent::all()->pluck('name', 'id'))
+                            ->columnSpan(2)
+                            ->required()
+                            ->searchable(),
                         MarkdownEditor::make('description')
                             ->required()
                             ->columnSpanFull(),

@@ -19,6 +19,8 @@ class EventsTable
                     ->visibility('public'),
                 TextColumn::make('name')
                     ->searchable(),
+                TextColumn::make('category.name')
+                    ->searchable(),
                 TextColumn::make('price')
                     ->label('Harga')
                     ->money('IDR', locale: 'id')
