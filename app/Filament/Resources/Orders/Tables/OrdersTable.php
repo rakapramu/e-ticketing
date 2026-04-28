@@ -18,6 +18,9 @@ class OrdersTable
     public static function configure(Table $table): Table
     {
         return $table
+            // ->header(function () {
+            //     return view('filament.resource.order-resource.widget.payment-info');
+            // })
             ->columns([
                 TextColumn::make('order_code')
                     ->label('Order Code')
