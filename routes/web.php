@@ -10,3 +10,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('ticket/{order}', [IndexController::class, 'ticket'])->name('ticket');
 Route::get('scan/{gate}', [IndexController::class, 'scan'])->name('gate');
 Route::get('scanner/{gate}', [IndexController::class, 'scanner'])->name('scanner');
+Route::get('/invoice/{order}/download', [IndexController::class, 'download'])
+    ->name('invoice.download')
+    ->middleware(['auth']);

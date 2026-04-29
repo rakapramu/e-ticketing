@@ -52,10 +52,21 @@ class OrdersTable
             ])
             ->recordActions([
                 // EditAction::make(),
+                Action::make('download_invoice')
+                    ->label('Invoice')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('gray')
+                    ->url(fn(Order $record): string => route('invoice.download', $record))
+                    ->openUrlInNewTab(),
                 Action::make('upload_payment')
                     ->label('Upload Bukti')
                     ->icon('heroicon-m-arrow-up-tray')
-                    ->visible(fn($record) => $record->status === 'pending' && auth()->user()->hasRole('partisipan'))
+                    ->visible(
+                        fn($record) =>
+                        auth()->user()->hasRole('partisipan') &&
+                            $record->status === 'pending' &&
+                            $record->payment_order === ''
+                    )
                     ->form([
                         FileUpload::make('payment_order')
                             ->label('Foto Bukti Transfer')
@@ -76,7 +87,7 @@ class OrdersTable
                     ->label('Cek Bukti')
                     ->icon('heroicon-m-eye')
                     ->color('info')
-                    ->visible(fn() => Auth::user()->can('ViewPayment'))
+                    ->visible(fn($record) => Auth::user()->can('ViewPayment') && $record->payment_order != null)
                     ->modalContent(fn(Order $record) => view('filament.components.view-payment-proof', ['record' => $record]))
                     ->modalSubmitAction(false)
                     ->modalCancelAction(false)

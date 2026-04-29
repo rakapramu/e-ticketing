@@ -185,4 +185,12 @@ class IndexController extends Controller
             ], 500);
         }
     }
+
+    public function download(Order $order)
+    {
+        $pdf = Pdf::loadView('front.pdf.invoice', compact('order'))
+            ->setPaper('A4', 'portrait');
+
+        return $pdf->stream('invoice-' . $order->order_code . '.pdf');
+    }
 }
