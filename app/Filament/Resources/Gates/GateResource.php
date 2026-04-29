@@ -22,7 +22,7 @@ class GateResource extends Resource
 {
     protected static ?string $model = Gate::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQrCode;
 
     protected static ?string $recordTitleAttribute = 'Gate';
 
@@ -42,9 +42,9 @@ class GateResource extends Resource
         return $table
             ->recordTitleAttribute('Gate')
             ->columns([
-                TextColumn::make('id')
-                    ->label('ID')
-                    ->searchable(),
+                TextColumn::make('no')
+                    ->label('No')
+                    ->rowIndex(),
                 TextColumn::make('nama')
                     ->searchable(),
                 TextColumn::make('lokasi')

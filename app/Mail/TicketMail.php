@@ -14,15 +14,13 @@ class TicketMail extends Mailable
 {
     use Queueable, SerializesModels;
     public $order;
-    public $qr;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($order, $qr)
+    public function __construct($order)
     {
         $this->order = $order;
-        $this->qr = $qr;
     }
 
 

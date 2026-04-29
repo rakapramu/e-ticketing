@@ -144,7 +144,7 @@
 
                 <div class="row">
                     <span class="label">Nama :</span>
-                    <span class="value">{{ $order->peserta->name }}</span>
+                    <span class="value">{{ $order->peserta->user->name }}</span>
                 </div>
 
                 <div class="row">

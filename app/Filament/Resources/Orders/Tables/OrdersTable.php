@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Orders\Tables;
 
+use App\Mail\TicketMail;
 use App\Models\Order;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -12,6 +13,8 @@ use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class OrdersTable
 {
@@ -22,6 +25,9 @@ class OrdersTable
             //     return view('filament.resource.order-resource.widget.payment-info');
             // })
             ->columns([
+                TextColumn::make('no')
+                    ->label('No')
+                    ->rowIndex(),
                 TextColumn::make('order_code')
                     ->label('Order Code')
                     ->searchable(),
@@ -58,6 +64,13 @@ class OrdersTable
                     ->color('gray')
                     ->url(fn(Order $record): string => route('invoice.download', $record))
                     ->openUrlInNewTab(),
+                Action::make('download_qr')
+                    ->label('Download QR')
+                    ->icon('heroicon-o-qr-code')
+                    ->color('gray')
+                    ->visible(fn($record) => $record->status === 'success')
+                    ->url(fn(Order $record): string => route('ticket', $record))
+                    ->openUrlInNewTab(),
                 Action::make('upload_payment')
                     ->label('Upload Bukti')
                     ->icon('heroicon-m-arrow-up-tray')
@@ -65,7 +78,7 @@ class OrdersTable
                         fn($record) =>
                         auth()->user()->hasRole('partisipan') &&
                             $record->status === 'pending' &&
-                            $record->payment_order === ''
+                            $record->payment_order === null
                     )
                     ->form([
                         FileUpload::make('payment_order')
@@ -100,14 +113,19 @@ class OrdersTable
                     ->requiresConfirmation()
                     ->visible(fn(Order $record) => Auth::user()->can('ApprovePayment') && $record->status === 'pending')
                     ->action(function (Order $record) {
-                        $record->update(['status' => 'success']);
-                        Notification::make()->title('Order Berhasil di-Approve')->success()->send();
+                        DB::transaction(function () use ($record) {
+                            $record->update(['status' => 'success']);
+                            Mail::to($record->peserta->user->email)->send(
+                                new TicketMail($record)
+                            );
+                            Notification::make()->title('Order Berhasil di-Approve')->success()->send();
+                        });
                     }),
             ])
             ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
+                // BulkActionGroup::make([
+                //     DeleteBulkAction::make(),
+                // ]),
             ]);
     }
 }

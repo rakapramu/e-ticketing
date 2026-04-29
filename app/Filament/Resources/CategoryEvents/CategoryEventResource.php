@@ -20,7 +20,7 @@ class CategoryEventResource extends Resource
 {
     protected static ?string $model = CategoryEvent::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
 
     protected static ?string $recordTitleAttribute = 'CategoryEvent';
 
@@ -38,8 +38,9 @@ class CategoryEventResource extends Resource
         return $table
             ->recordTitleAttribute('CategoryEvent')
             ->columns([
-                TextColumn::make('id')
-                    ->label('ID'),
+                TextColumn::make('no')
+                    ->label('No')
+                    ->rowIndex(),
                 TextColumn::make('name')
                     ->searchable(),
             ])

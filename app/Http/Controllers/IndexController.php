@@ -191,6 +191,6 @@ class IndexController extends Controller
         $pdf = Pdf::loadView('front.pdf.invoice', compact('order'))
             ->setPaper('A4', 'portrait');
 
-        return $pdf->stream('invoice-' . $order->order_code . '.pdf');
+        return $pdf->download('invoice-' . $order->order_code . '.pdf');
     }
 }

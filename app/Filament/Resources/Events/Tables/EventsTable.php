@@ -14,6 +14,9 @@ class EventsTable
     {
         return $table
             ->columns([
+                TextColumn::make('no')
+                    ->label('No')
+                    ->rowIndex(),
                 ImageColumn::make('foto')
                     ->disk('public')
                     ->visibility('public'),

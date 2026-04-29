@@ -20,9 +20,16 @@ class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShoppingCart;
 
     protected static ?string $recordTitleAttribute = 'Order';
+
+    public static function getLabel(): string
+    {
+        return auth()->user()?->hasRole('partisipan')
+            ? 'Riwayat Order'
+            : 'Order';
+    }
 
 
     public static function getEloquentQuery(): Builder

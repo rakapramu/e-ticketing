@@ -13,11 +13,14 @@ class PesertasTable
     {
         return $table
             ->columns([
+                TextColumn::make('no')
+                    ->label('No')
+                    ->rowIndex(),
                 TextColumn::make('nik'),
-                TextColumn::make('name')
+                TextColumn::make('user.name')
                     ->label('Nama')
                     ->searchable(),
-                TextColumn::make('email')
+                TextColumn::make('user.email')
                     ->label('Email')
                     ->searchable(),
                 TextColumn::make('no_wa')

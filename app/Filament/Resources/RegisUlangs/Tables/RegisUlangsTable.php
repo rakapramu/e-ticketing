@@ -13,6 +13,9 @@ class RegisUlangsTable
     {
         return $table
             ->columns([
+                TextColumn::make('no')
+                    ->label('No')
+                    ->rowIndex(),
                 TextColumn::make('order.event.name')
                     ->label('Event')
                     ->searchable(),

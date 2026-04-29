@@ -20,7 +20,7 @@ class GelarResource extends Resource
 {
     protected static ?string $model = Gelar::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
 
     protected static ?string $recordTitleAttribute = 'Gelar';
 
@@ -38,9 +38,9 @@ class GelarResource extends Resource
         return $table
             ->recordTitleAttribute('Gelar')
             ->columns([
-                TextColumn::make('id')
-                    ->label('ID')
-                    ->searchable(),
+                TextColumn::make('no')
+                    ->label('No')
+                    ->rowIndex(),
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('created_at')

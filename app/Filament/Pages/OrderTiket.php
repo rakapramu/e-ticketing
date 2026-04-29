@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 
 class OrderTiket extends Page
 {
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::Ticket;
     protected string $view = 'filament.pages.order-tiket';
 
     public static function canAccess(): bool
@@ -25,7 +25,16 @@ class OrderTiket extends Page
 
     public function getCategories()
     {
-        return CategoryEvent::with('event')->get();
+        $data = CategoryEvent::query()
+            ->with(['event' => function ($query) {
+                $query->where('is_active', true);
+            }])
+            ->whereHas('event', function ($query) {
+                $query->where('is_active', true);
+            })
+            ->get();
+
+        return $data;
     }
 
     public function orderAction(): Action

@@ -60,7 +60,7 @@
                             </div>
                             <div class="col-span-1 md:col-span-2 text-center">
                                 <span class="text-xl font-extrabold text-primary-600">
-                                    Rp {{ number_format($item->price, 0, ',', '.') }}
+                                    Rp {{ number_format($item->final_price, 0, ',', '.') }}
                                 </span>
                             </div>
 
