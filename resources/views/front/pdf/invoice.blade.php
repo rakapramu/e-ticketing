@@ -10,9 +10,9 @@
         }
 
         .header-img {
-            width: 100%;
+            width: 100px;
             height: auto;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .title {
@@ -69,8 +69,8 @@
 </head>
 
 <body>
-    <div style="text-align: center;">
-        <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('images/header.jpg'))) }}"
+    <div style="text-align: left;">
+        <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('images/logo-juf.png'))) }}"
             class="header-img">
     </div>
 
