@@ -78,9 +78,11 @@ class MyProfile extends Page implements HasForms
                             TextInput::make('title_of_specialist')->label('Title of Specialist')->required(),
                             Select::make('participant_type')
                                 ->options([
-                                    'Urologist' => 'Urologist',
-                                    'Resident' => 'Resident',
-                                    'General Practitioner' => 'General Practitioner',
+                                    'urologist' => 'Urologist',
+                                    'resident' => 'Resident',
+                                    'general_practitioner' => 'General Practitioner',
+                                    'other_specialist' => 'Other Specialist',
+                                    'medical_student' => 'Medical Student',
                                 ]),
                             TextInput::make('name_on_certificate')->required(),
                             TextInput::make('institution')->required(),
