@@ -42,7 +42,6 @@ class EventForm
                         FileUpload::make('foto')
                             ->image()
                             ->disk('public')
-                            ->required()
                             ->imageEditor()
                             ->columnSpanFull()
                             ->directory('events')
