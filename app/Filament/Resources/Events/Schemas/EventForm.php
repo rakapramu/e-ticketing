@@ -42,12 +42,11 @@ class EventForm
                         FileUpload::make('foto')
                             ->image()
                             ->disk('public')
-                            ->required()
                             ->imageEditor()
                             ->columnSpanFull()
                             ->directory('events')
                             ->visibility('public')
-                            ->required(fn(string $context): bool => $context === 'create')
+                            // ->required(fn(string $context): bool => $context === 'create')
                             ->afterStateUpdated(function ($state, $record) {
                                 if ($record && $record->foto && $state !== $record->foto) {
                                     Storage::disk('public')->delete($record->foto);

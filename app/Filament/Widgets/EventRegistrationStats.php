@@ -10,6 +10,11 @@ class EventRegistrationStats extends BaseWidget
 {
     protected ?string $pollingInterval = '10s';
 
+    public static function canView(): bool
+    {
+        return auth()->user()?->can('View:EventRegistrationStats');
+    }
+
     protected function getStats(): array
     {
         $events = Event::withCount('regisUlang')->get();
