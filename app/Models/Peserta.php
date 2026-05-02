@@ -45,4 +45,9 @@ class Peserta extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function abstrac()
+    {
+        return $this->hasMany(AbstracAdmission::class);
+    }
 }
