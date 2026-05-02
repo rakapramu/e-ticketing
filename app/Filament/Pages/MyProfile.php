@@ -69,7 +69,7 @@ class MyProfile extends Page implements HasForms
                             TextInput::make('id_participant')->disabled(),
                             TextInput::make('email')->required()->disabled(),
                             TextInput::make('name')->required(),
-                            TextInput::make('nik')->required()->numeric(),
+                            TextInput::make('nik')->label('NIK')->required()->numeric(),
                             Select::make('gelar_id')
                                 ->label('Title')
                                 ->required()

@@ -100,13 +100,16 @@ class OrderTiket extends Page
                 try {
                     DB::transaction(function () use ($user, $peserta, $event) {
                         $orderCode = 'ORD-' . now()->format('Ymd') . '-' . strtoupper(str()->random(5));
+                        $uniqueCode = random_int(100, 999);
 
+                        $finalTotal = $event->price + $uniqueCode;
                         Order::create([
                             'order_code' => $orderCode,
                             'peserta_id' => $peserta->id,
                             'event_id'   => $event->id,
                             'qty'        => 1,
-                            'total'      => $event->price,
+                            'kode_unik'  => $uniqueCode,
+                            'total'      => $finalTotal,
                             'status'     => 'pending',
                         ]);
 

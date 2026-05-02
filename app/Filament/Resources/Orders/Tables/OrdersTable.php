@@ -63,6 +63,7 @@ class OrdersTable
                     ->icon('heroicon-o-document-arrow-down')
                     ->color('gray')
                     ->url(fn(Order $record): string => route('invoice.download', $record))
+                    ->visible(fn($record) => $record->status === 'success')
                     ->openUrlInNewTab(),
                 Action::make('download_qr')
                     ->label('Download QR')
