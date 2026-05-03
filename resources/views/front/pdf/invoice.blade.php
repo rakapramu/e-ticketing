@@ -15,6 +15,12 @@
             margin-bottom: 15px;
         }
 
+        .header-img2 {
+            height: 50px;
+            width: auto;
+            margin-bottom: 15px;
+        }
+
         .title {
             font-size: 18px;
             font-weight: bold;
@@ -74,7 +80,7 @@
             class="header-img" style="display: inline-block; margin-right: 10px;">
 
         <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('images/logo2.png'))) }}"
-            class="header-img" style="display: inline-block;">
+            class="header-img2" style="display: inline-block;">
     </div>
 
     <div class="title">INVOICE ATTACHMENT</div>
@@ -124,9 +130,6 @@
         Account Name: IAUI Wilayah DI Yogyakarta<br>
         Account Number: 7446665558
     </div>
-
-    <p style="font-style: italic; margin-top: 20px;">* The registration confirmation letter will be provided once your
-        payment arrives in our bank account.</p>
 </body>
 
 </html>
