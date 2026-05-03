@@ -10,8 +10,8 @@
         }
 
         .header-img {
-            width: 100px;
-            height: auto;
+            height: 70px;
+            width: auto;
             margin-bottom: 15px;
         }
 
@@ -71,7 +71,10 @@
 <body>
     <div style="text-align: left;">
         <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('images/logo-juf.png'))) }}"
-            class="header-img">
+            class="header-img" style="display: inline-block; margin-right: 10px;">
+
+        <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('images/logo2.png'))) }}"
+            class="header-img" style="display: inline-block;">
     </div>
 
     <div class="title">INVOICE ATTACHMENT</div>
@@ -117,9 +120,9 @@
 
     <div class="payment-box">
         <strong>Payment Method: Bank Transfer</strong><br>
-        Bank Name: Mandiri KCP Jakarta RSCM<br>
-        Account Name: Perkumpulan Dokter Spesialis Urologi<br>
-        Account Number: 122-00-1139401-5
+        Bank Name: Bank Syariah Mandiri<br>
+        Account Name: IAUI Wilayah DI Yogyakarta<br>
+        Account Number: 7446665558
     </div>
 
     <p style="font-style: italic; margin-top: 20px;">* The registration confirmation letter will be provided once your

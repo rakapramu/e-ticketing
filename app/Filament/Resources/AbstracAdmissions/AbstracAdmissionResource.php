@@ -18,6 +18,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -29,6 +30,11 @@ class AbstracAdmissionResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $recordTitleAttribute = 'AbstracAdmission';
+
+    protected static ?string $navigationLabel = 'Abstarct Submissions';
+
+    protected static ?string $pluralLabel = 'Abstract Submissions';
+    protected static ?string $label = 'Abstract Submission';
 
     public static function shouldRegisterNavigation(): bool
     {
@@ -80,6 +86,7 @@ class AbstracAdmissionResource extends Resource
                 TextColumn::make('judul')
                     ->searchable(),
                 TextColumn::make('peserta.user.name')
+                    ->label('Peserta')
                     ->searchable(),
                 TextColumn::make('file')
                     ->label('File')
@@ -103,6 +110,8 @@ class AbstracAdmissionResource extends Resource
                         'unvalidated' => 'warning',
                         default => 'gray',
                     }),
+                TextColumn::make('created_at')
+                    ->formatStateUsing(fn($state) => $state->format('d F Y')),
             ])
             ->filters([
                 //
