@@ -45,4 +45,9 @@ class Event extends Model
             'id'
         );
     }
+
+    public function coupons()
+    {
+        return $this->belongsToMany(KodeKupon::class, 'kupon_events', 'event_id', 'kode_kupon_id');
+    }
 }
