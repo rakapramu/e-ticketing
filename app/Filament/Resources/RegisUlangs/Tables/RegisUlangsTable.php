@@ -23,10 +23,10 @@ class RegisUlangsTable
                     ->searchable(),
                 TextColumn::make('order.created_at')
                     ->label('Tanggal Pemesanan')
-                    ->getStateUsing(fn($record) => $record->order->created_at->format('d F Y')),
+                    ->date('d F Y'),
                 TextColumn::make('created_at')
                     ->label('Tanggal Registrasi')
-                    ->getStateUsing(fn($record) => $record->created_at->format('d F Y')),
+                    ->date('d F Y'),
             ])
             ->filters([
                 //
