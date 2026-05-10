@@ -16,7 +16,9 @@ class PesertasTable
                 TextColumn::make('no')
                     ->label('No')
                     ->rowIndex(),
-                TextColumn::make('nik'),
+                TextColumn::make('nik')
+                    ->label('NIK')
+                    ->formatStateUsing(fn($state) => (string) $state),
                 TextColumn::make('user.name')
                     ->label('Nama')
                     ->searchable(),
