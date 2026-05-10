@@ -6,8 +6,10 @@ use Filament\Pages\Page;
 use App\Models\CategoryEvent;
 use App\Models\Event;
 use App\Models\Order;
+use App\Models\KodeKupon; // Pastikan Model diimport
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +19,8 @@ class OrderTiket extends Page
 {
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Ticket;
     protected string $view = 'filament.pages.order-tiket';
+
+    public $coupon_code = '';
 
     public static function canAccess(): bool
     {
@@ -51,7 +55,12 @@ class OrderTiket extends Page
             ->modalHeading('Konfirmasi Pemesanan')
             ->modalDescription('Apakah Anda yakin ingin memesan tiket ini?')
             ->modalSubmitActionLabel('Ya, Pesan Sekarang')
-            ->action(function (array $arguments) {
+            ->form([
+                TextInput::make('coupon_code')
+                    ->label('Kode Kupon (Opsional)')
+                    ->placeholder('Masukkan kode jika ada')
+            ])
+            ->action(function (array $arguments, array $data) { // Tambahkan $data untuk ambil input form
                 $user = Auth::user();
                 $peserta = $user->peserta;
                 $eventId = $arguments['ticketId'];
@@ -98,19 +107,61 @@ class OrderTiket extends Page
                 }
 
                 try {
-                    DB::transaction(function () use ($user, $peserta, $event) {
+                    DB::transaction(function () use ($user, $peserta, $event, $data) {
                         $orderCode = 'ORD-' . now()->format('Ymd') . '-' . strtoupper(str()->random(5));
                         $uniqueCode = random_int(100, 999);
+                        $discount = 0;
+                        $couponId = null;
 
-                        $finalTotal = $event->price + $uniqueCode;
+                        // --- LOGIKA KUPON ---
+                        if (!empty($data['coupon_code'])) {
+                            $coupon = KodeKupon::where('kode', $data['coupon_code'])
+                                ->where('is_active', true)
+                                ->first();
+
+                            if (!$coupon) {
+                                throw new \Exception('Kode kupon tidak valid.');
+                            }
+
+                            // 1. Cek Relasi Kupon ke Event
+                            if (!$coupon->events->contains($event->id)) {
+                                throw new \Exception('Kupon tidak berlaku untuk event ini.');
+                            }
+
+                            // 2. Cek Limit Kupon (Global)
+                            $totalUsed = Order::where('kode_kupon_id', $coupon->id)
+                                ->whereIn('status', ['pending', 'waiting_approval', 'success'])
+                                ->count();
+
+                            if ($coupon->limit > 0 && $totalUsed >= $coupon->limit) {
+                                throw new \Exception('Kuota kupon sudah habis.');
+                            }
+
+                            // 3. Cek Limit User (Per Partisipan)
+                            $userUsedCount = Order::where('kode_kupon_id', $coupon->id)
+                                ->where('peserta_id', $peserta->id)
+                                ->whereIn('status', ['pending', 'waiting_approval', 'success'])
+                                ->count();
+
+                            if ($coupon->limit_user > 0 && $userUsedCount >= $coupon->limit_user) {
+                                throw new \Exception('Anda sudah mencapai batas pemakaian kupon ini.');
+                            }
+
+                            $discount = $coupon->diskon;
+                            $couponId = $coupon->id;
+                        }
+
+                        $finalTotal = max(0, ($event->final_price - $discount) + $uniqueCode);
+
                         Order::create([
-                            'order_code' => $orderCode,
-                            'peserta_id' => $peserta->id,
-                            'event_id'   => $event->id,
-                            'qty'        => 1,
-                            'kode_unik'  => $uniqueCode,
-                            'total'      => $finalTotal,
-                            'status'     => 'pending',
+                            'order_code'    => $orderCode,
+                            'peserta_id'    => $peserta->id,
+                            'event_id'      => $event->id,
+                            'kode_kupon_id' => $couponId,
+                            'qty'           => 1,
+                            'kode_unik'     => $uniqueCode,
+                            'total'         => $finalTotal,
+                            'status'        => 'pending',
                         ]);
 
                         if ($event->stock !== null) {
@@ -125,8 +176,8 @@ class OrderTiket extends Page
                         ->send();
                 } catch (\Exception $e) {
                     Notification::make()
-                        ->title('Terjadi Kesalahan')
-                        ->body('Gagal memproses pesanan. Silakan coba lagi.')
+                        ->title('Gagal Memproses Pesanan')
+                        ->body($e->getMessage()) // Menampilkan pesan error validasi kupon
                         ->danger()
                         ->send();
                 }

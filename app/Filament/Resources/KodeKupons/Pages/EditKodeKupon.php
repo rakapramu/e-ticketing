@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\Coupons\Pages;
+namespace App\Filament\Resources\KodeKupons\Pages;
 
-use App\Filament\Resources\Coupons\CouponResource;
+use App\Filament\Resources\KodeKupons\KodeKuponResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
-class EditCoupon extends EditRecord
+class EditKodeKupon extends EditRecord
 {
-    protected static string $resource = CouponResource::class;
+    protected static string $resource = KodeKuponResource::class;
 
     protected function getHeaderActions(): array
     {

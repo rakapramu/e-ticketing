@@ -18,4 +18,9 @@ class KodeKupon extends Model
     {
         return $this->belongsToMany(Event::class, 'kupon_events', 'kode_kupon_id', 'event_id');
     }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
 }

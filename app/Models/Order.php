@@ -28,4 +28,9 @@ class Order extends Model
     {
         return $this->hasOne(RegisUlang::class);
     }
+
+    public function kodeKupon()
+    {
+        return $this->belongsTo(KodeKupon::class);
+    }
 }

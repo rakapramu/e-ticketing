@@ -39,7 +39,15 @@ class OrdersTable
                     ->searchable(),
                 TextColumn::make('total')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->icon(fn($record): string|null => $record->kode_kupon_id ? 'heroicon-m-ticket' : null)
+                    ->iconColor('success')
+                    ->tooltip(function ($record) {
+                        if ($record->kode_kupon_id && $record->kodeKupon) {
+                            return "Kupon: " . $record->kodeKupon->kode;
+                        }
+                        return null;
+                    }),
                 TextColumn::make('status')
                     ->badge()
                     ->getStateUsing(fn($record) => $record->status)

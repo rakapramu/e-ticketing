@@ -153,8 +153,25 @@
                 </div>
 
                 <div class="row">
-                    <span class="label">Total :</span>
-                    <span class="value" style="color:#f97316;">
+                    <span class="label">Harga Tiket :</span>
+                    @php
+                        $total = $order->event->final_price + $order->kode_unik;
+                    @endphp
+                    <span class="value">Rp {{ number_format($total, 0, ',', '.') }}</span>
+                </div>
+
+                @if ($order->kode_kupon_id && $order->kodeKupon)
+                    <div class="row">
+                        <span class="label">Kupon ({{ $order->kodeKupon->kode }}) :</span>
+                        <span class="value" style="color: #dc2626;">
+                            Rp {{ number_format($order->kodeKupon->diskon, 0, ',', '.') }}
+                        </span>
+                    </div>
+                @endif
+
+                <div class="row" style="border-bottom: 2px solid #f97316; padding-bottom: 10px; margin-top: 5px;">
+                    <span class="label" style="color: #111827; font-weight: bold;">Total Bayar :</span>
+                    <span class="value" style="color:#f97316; font-size: 15px;">
                         Rp {{ number_format($order->total, 0, ',', '.') }}
                     </span>
                 </div>

@@ -115,8 +115,23 @@
                 <td>1.</td>
                 <td>{{ $order->event->name }}</td>
                 <td>{{ $order->qty }}</td>
-                <td>IDR {{ number_format($order->total, 0, ',', '.') }}</td>
+                @php
+                    $total = $order->event->final_price + $order->kode_unik;
+                @endphp
+                <td>Rp. {{ number_format($total, 0, ',', '.') }}</td>
             </tr>
+
+            @if ($order->kode_kupon_id && $order->kodeKupon)
+                <tr>
+                    <td colspan="3" style="text-align: right;">
+                        <strong>Kupon: {{ $order->kodeKupon->kode }}</strong>
+                    </td>
+                    <td style="color: #dc2626;">
+                        Rp. {{ number_format($order->kodeKupon->diskon, 0, ',', '.') }}
+                    </td>
+                </tr>
+            @endif
+
             <tr class="total-row">
                 <td colspan="3" style="text-align: right;">Total</td>
                 <td>IDR {{ number_format($order->total, 0, ',', '.') }}</td>
