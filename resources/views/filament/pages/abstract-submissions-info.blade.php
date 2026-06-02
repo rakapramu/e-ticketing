@@ -266,7 +266,7 @@
                     Scientific Competition JUF 2026
                 </h1>
                 <p class="hero-desc">
-                    Pengumpulan abstrak untuk kompetisi ilmiah JUF 2026 kini dialihkan langsung melalui email panitia. Silakan unduh panduan penulisan di bawah ini dan ikuti petunjuk pengiriman yang tertera.
+                    Pengumpulan abstrak untuk kompetisi ilmiah JUF 2026 langsung melalui email panitia. Silakan unduh panduan penulisan di bawah ini dan ikuti petunjuk pengiriman yang tertera.
                 </p>
                 
                 <div>
