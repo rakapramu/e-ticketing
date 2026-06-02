@@ -114,7 +114,7 @@ class MyProfile extends Page implements HasForms
                                 })
                                 ->searchable()
                                 ->required()
-                                ->key(fn(Get $get) => "city-for-{$get('province')}")
+                                ->key(fn(Get $get) => "city-for-{$get('province_id')}")
                                 ->placeholder(fn(Get $get) => $get('province_id') ? 'Select a city' : 'Select a province first'),
                             TextInput::make('country')->required(),
                             TextInput::make('postal_code'),

@@ -17,15 +17,19 @@ class EventRegistrationStats extends BaseWidget
 
     protected function getStats(): array
     {
-        $events = Event::withCount('regisUlang')->get();
+        $events = Event::with('order')->get();
 
         $stats = [];
 
         foreach ($events as $event) {
-            $stats[] = Stat::make("Event : {$event->name}", $event->regis_ulang_count)
-                ->description("Total peserta regis ulang")
+            $total = $event->order->whereIn('status', ['pending', 'success'])->count();
+            $pending = $event->order->where('status', 'pending')->count();
+            $approve = $event->order->where('status', 'success')->count();
+
+            $stats[] = Stat::make("Total Peserta : {$event->name}", (string) $total)
+                ->description("Pending {$pending} | Approve {$approve}")
                 ->descriptionIcon('heroicon-m-user-group')
-                ->color('success');
+                ->color('info');
         }
 
         if (empty($stats)) {

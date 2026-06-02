@@ -236,7 +236,8 @@ return [
 
     'custom_permissions' => [
         'approvePayment',
-        'viewPayment'
+        'viewPayment',
+        'exportOrder',
     ],
 
     /*

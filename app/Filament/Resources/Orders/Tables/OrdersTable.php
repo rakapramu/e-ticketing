@@ -5,6 +5,8 @@ namespace App\Filament\Resources\Orders\Tables;
 use App\Mail\TicketMail;
 use App\Models\Order;
 use Filament\Actions\Action;
+use Filament\Actions\ExportAction;
+use App\Filament\Exports\OrderExporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -132,6 +134,11 @@ class OrdersTable
                     }),
             ])
             ->toolbarActions([
+                ExportAction::make()
+                    ->exporter(OrderExporter::class)
+                    ->label('Download Excel')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->visible(fn() => auth()->user()->can('ExportOrder')),
                 // BulkActionGroup::make([
                 //     DeleteBulkAction::make(),
                 // ]),
