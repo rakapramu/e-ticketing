@@ -34,4 +34,9 @@ class ManageAbstracAdmissions extends ManageRecords
 
         return [];
     }
+
+    public function getView(): string
+    {
+        return 'filament.pages.abstract-submissions-info';
+    }
 }

@@ -14,12 +14,12 @@ class AbstracAdmissionPolicy
     
     public function viewAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ViewAny:AbstracAdmission');
+        return $authUser->hasRole('partisipan') || $authUser->can('ViewAny:AbstracAdmission');
     }
 
     public function view(AuthUser $authUser, AbstracAdmission $abstracAdmission): bool
     {
-        return $authUser->can('View:AbstracAdmission');
+        return $authUser->hasRole('partisipan') || $authUser->can('View:AbstracAdmission');
     }
 
     public function create(AuthUser $authUser): bool
