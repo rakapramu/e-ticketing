@@ -15,7 +15,7 @@
             <div
                 class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-100 dark:border-gray-700 w-full md:w-auto">
                 <div class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Bank</div>
-                <div class="text-sm font-bold text-gray-900 dark:text-white">: Bank Syariah Mandiri</div>
+                <div class="text-sm font-bold text-gray-900 dark:text-white">: Bank Syariah Indonesia</div>
 
                 <div class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Nama Rekening</div>
                 <div class="text-sm font-bold text-gray-900 dark:text-white">: IAUI Wilayah DI Yogyakarta</div>

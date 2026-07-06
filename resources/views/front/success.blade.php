@@ -125,7 +125,7 @@
                 <div class="info-row"><span class="ir-lbl">A.N</span><span class="ir-val">IAUI Wilayah DI
                         Yogyakarta</span>
                 </div>
-                <div class="info-row"><span class="ir-lbl">Bank</span><span class="ir-val">Bank Syariah Mandiri</span>
+                <div class="info-row"><span class="ir-lbl">Bank</span><span class="ir-val">Bank Syariah Indonesia</span>
                 </div>
                 <div class="info-row"><span class="ir-lbl">No. Rekening</span><span class="ir-val">7446665558</span>
                 </div>

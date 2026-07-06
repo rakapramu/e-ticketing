@@ -141,7 +141,7 @@
 
     <div class="payment-box">
         <strong>Payment Method: Bank Transfer</strong><br>
-        Bank Name: Bank Syariah Mandiri<br>
+        Bank Name: Bank Syariah Indonesia<br>
         Account Name: IAUI Wilayah DI Yogyakarta<br>
         Account Number: 7446665558
     </div>
