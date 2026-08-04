@@ -22,6 +22,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class MyProfile extends Page implements HasForms
 {
@@ -120,6 +121,39 @@ class MyProfile extends Page implements HasForms
                             TextInput::make('postal_code'),
                             TextInput::make('no_wa')->label('Phone')->tel()->required(),
                         ]),
+                    ]),
+
+                Section::make('Ubah Password / Change Password')
+                    ->description('Kosongkan jika tidak ingin mengubah password / Leave empty if you do not want to change password')
+                    ->collapsible()
+                    ->collapsed()
+                    ->schema([
+                        Grid::make(3)->schema([
+                            TextInput::make('current_password')
+                                ->label('Password Saat Ini / Current Password')
+                                ->password()
+                                ->revealable()
+                                ->required(fn (Get $get) => filled($get('new_password')))
+                                ->rules([
+                                    fn (Get $get) => function (string $attribute, $value, $fail) {
+                                        if (filled($value) && !Hash::check($value, Auth::user()->password)) {
+                                            $fail('Password saat ini tidak cocok.');
+                                        }
+                                    },
+                                ]),
+                            TextInput::make('new_password')
+                                ->label('Password Baru / New Password')
+                                ->password()
+                                ->revealable()
+                                ->required(fn (Get $get) => filled($get('current_password')))
+                                ->minLength(8)
+                                ->same('new_password_confirmation'),
+                            TextInput::make('new_password_confirmation')
+                                ->label('Konfirmasi Password Baru / Confirm New Password')
+                                ->password()
+                                ->revealable()
+                                ->required(fn (Get $get) => filled($get('new_password'))),
+                        ])
                     ])
             ]);
     }
@@ -129,10 +163,41 @@ class MyProfile extends Page implements HasForms
         $data = $this->form->getState();
         $user = Auth::user();
 
+        // 1. Update password if new password is provided
+        if (filled($data['new_password'] ?? null)) {
+            $user->update([
+                'password' => Hash::make($data['new_password']),
+            ]);
+        }
+
+        // 2. Update name in user model to keep in sync
+        if (filled($data['name'] ?? null)) {
+            $user->update([
+                'name' => $data['name'],
+            ]);
+        }
+
+        // 3. Filter out password fields and email before updating peserta
+        $pesertaData = collect($data)
+            ->except(['current_password', 'new_password', 'new_password_confirmation', 'email'])
+            ->toArray();
+
         $user->peserta()->updateOrCreate(
             ['user_id' => $user->id],
-            $data
+            $pesertaData
         );
+
+        // 4. Clear the password fields so they are empty in the form after saving
+        $this->form->fill(array_merge(
+            $user->peserta ? $user->peserta->toArray() : [],
+            [
+                'email' => $user->email,
+                'name' => $user->name,
+                'current_password' => null,
+                'new_password' => null,
+                'new_password_confirmation' => null,
+            ]
+        ));
 
         Notification::make()
             ->title('Profil diperbarui')
