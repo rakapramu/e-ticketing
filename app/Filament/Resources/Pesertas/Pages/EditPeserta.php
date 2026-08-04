@@ -3,19 +3,49 @@
 namespace App\Filament\Resources\Pesertas\Pages;
 
 use App\Filament\Resources\Pesertas\PesertaResource;
-// use Filament\Actions\DeleteAction;
+use Filament\Actions\Action;
+use Filament\Forms\Components\TextInput;
+use Illuminate\Support\Facades\Hash;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 
 class EditPeserta extends EditRecord
 {
     protected static string $resource = PesertaResource::class;
 
-    // protected function getHeaderActions(): array
-    // {
-    //     return [
-    //         DeleteAction::make(),
-    //     ];
-    // }
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('resetPassword')
+                ->label('Reset Password')
+                ->icon('heroicon-m-key')
+                ->color('warning')
+                ->form([
+                    TextInput::make('password')
+                        ->label('Password Baru / New Password')
+                        ->password()
+                        ->revealable()
+                        ->required()
+                        ->minLength(8)
+                        ->same('password_confirmation'),
+                    TextInput::make('password_confirmation')
+                        ->label('Konfirmasi Password Baru / Confirm New Password')
+                        ->password()
+                        ->revealable()
+                        ->required(),
+                ])
+                ->action(function (array $data) {
+                    $this->record->user?->update([
+                        'password' => Hash::make($data['password']),
+                    ]);
+
+                    Notification::make()
+                        ->title('Password berhasil direset')
+                        ->success()
+                        ->send();
+                })
+        ];
+    }
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
