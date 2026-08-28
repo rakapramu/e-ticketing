@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Auth;
 
 class SelfCheckin extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-camera';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-camera';
 
     protected static string $view = 'filament.pages.self-checkin';
 
