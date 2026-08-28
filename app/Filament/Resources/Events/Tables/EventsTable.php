@@ -44,7 +44,7 @@ class EventsTable
                 //
             ])
             ->recordActions([
-                \Filament\Tables\Actions\Action::make('qrCode')
+                \Filament\Actions\Action::make('qrCode')
                     ->label('QR Event')
                     ->icon('heroicon-o-qr-code')
                     ->color('info')
