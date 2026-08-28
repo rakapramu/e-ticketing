@@ -239,14 +239,15 @@
                 });
 
                 const data = await response.json();
+                const ticketName = (data.ticket && data.ticket.name) ? data.ticket.name : '';
 
                 if (response.ok && data.success) {
-                    showFeedback('success', data.ticket.name, 'Tiket Berhasil Diverifikasi');
+                    showFeedback('success', ticketName || 'Peserta', data.message || 'Silakan Masuk Venue');
                 } else {
-                    showFeedback('error', 'GAGAL', data.message || 'Tiket Tidak Valid');
+                    showFeedback('error', ticketName, data.message || 'Tiket Tidak Valid');
                 }
             } catch (err) {
-                showFeedback('error', 'KONEKSI ERROR', 'Gagal menghubungi server');
+                showFeedback('error', '', 'Gagal menghubungi server');
             }
         }
 
@@ -260,8 +261,10 @@
             el.className = `scan-feedback scan-overlay-result overlay-${type}`;
             icon.className = `icon-large bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-shield-fill-x'}`;
             nameEl.textContent = name;
+            nameEl.style.display = name ? 'block' : 'none';
             msgEl.textContent = msg;
             welcomeEl.style.display = type === 'success' ? 'block' : 'none';
+            welcomeEl.textContent = 'Selamat Datang!';
 
             el.classList.remove('hidden');
 
@@ -272,7 +275,7 @@
                 }
 
                 isProcessing = false;
-            }, 10000);
+            }, 3000);
         }
 
         function playBeep() {

@@ -85,7 +85,7 @@ window.addEventListener('scan-processed', (event) => {
         showOverlay = false;
         if (html5QrCode && isCameraRunning) { html5QrCode.resume(); }
         isProcessing = false;
-    }, 5000);
+    }, 3000);
 });" x-on:close-modal.window="stopScanner()" class="scanner-container">
 
     <style>

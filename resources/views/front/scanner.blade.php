@@ -244,11 +244,12 @@
                 });
 
                 const data = await response.json();
+                const ticketName = (data.ticket && data.ticket.name) ? data.ticket.name : '';
 
                 if (response.ok && data.success) {
-                    showResult('success', data.ticket.name, 'SILAKAN MASUK VENUE');
+                    showResult('success', ticketName || 'Peserta', 'SILAKAN MASUK VENUE');
                 } else {
-                    showResult('error', data.message, data.message || 'TIKET TIDAK VALID');
+                    showResult('error', ticketName || 'TIKET TIDAK VALID', data.message || 'TIKET TIDAK VALID');
                 }
             } catch (err) {
                 showResult('error', 'KONEKSI ERROR', 'GAGAL MENGHUBUNGI SERVER');
@@ -263,6 +264,7 @@
             nameEl.textContent = name;
             msgEl.textContent = msg;
             welcomeEl.style.display = type === 'success' ? 'block' : 'none';
+            welcomeEl.textContent = 'Selamat Datang / Welcome';
 
             setTimeout(() => {
                 overlay.classList.remove('active');
@@ -270,7 +272,7 @@
                     isProcessing = false;
                     focusScanner();
                 }, 400);
-            }, 8000);
+            }, 3000);
         }
 
         function playBeep() {

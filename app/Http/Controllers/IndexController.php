@@ -130,19 +130,29 @@ class IndexController extends Controller
 
     public function verify(Request $request, $code)
     {
-        $order = Order::with('regisUlang', 'peserta')->where('order_code', $code)->first();
+        $order = Order::with(['regisUlang', 'peserta.user', 'event'])->where('order_code', $code)->first();
         if (!$order) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kode order tidak ditemukan.'
+                'message' => 'Kode order tidak ditemukan.',
+                'ticket' => [
+                    'name' => 'TIDAK DIKENAL',
+                    'category' => '-',
+                ]
             ], 404);
         }
+
+        $pesertaName = $order->peserta?->user?->name ?? $order->peserta?->name_on_certificate ?? 'Peserta';
 
         if ($order->status !== 'success') {
             $msg = $order->status === 'pending' ? 'Pembayaran masih pending.' : 'Pembayaran gagal/dibatalkan.';
             return response()->json([
                 'success' => false,
-                'message' => $msg
+                'message' => $msg,
+                'ticket' => [
+                    'name' => $pesertaName,
+                    'category' => "Event : " . ($order->event?->name ?? '-'),
+                ]
             ], 422);
         }
 
@@ -152,8 +162,8 @@ class IndexController extends Controller
                 'message' => 'Peserta sudah melakukan registrasi ulang pada ' .
                     Carbon::parse($order->regisUlang->waktu)->format('H:i:s'),
                 'ticket' => [
-                    'name' => 'Sudah Masuk',
-                    'category' => 'Terverifikasi',
+                    'name' => $pesertaName,
+                    'category' => 'Sudah Masuk',
                 ]
             ], 422);
         }
@@ -171,10 +181,10 @@ class IndexController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Registrasi ulang berhasil! Selamat datang.',
+                'message' => 'Silakan Masuk Venue',
                 'ticket' => [
-                    'name' => $order->peserta->name,
-                    'category' => "Event : " . $order->event->name,
+                    'name' => $pesertaName,
+                    'category' => "Event : " . ($order->event?->name ?? '-'),
                 ]
             ]);
         } catch (\Exception $e) {
