@@ -2,25 +2,52 @@
 
 namespace App\Filament\Resources\RegisUlangs;
 
-use App\Filament\Resources\RegisUlangs\Pages\CreateRegisUlang;
-use App\Filament\Resources\RegisUlangs\Pages\EditRegisUlang;
 use App\Filament\Resources\RegisUlangs\Pages\ListRegisUlangs;
 use App\Filament\Resources\RegisUlangs\Schemas\RegisUlangForm;
 use App\Filament\Resources\RegisUlangs\Tables\RegisUlangsTable;
-use App\Models\RegisUlang;
+use App\Models\RegisUlangEvent;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class RegisUlangResource extends Resource
 {
-    protected static ?string $model = RegisUlang::class;
+    protected static ?string $model = RegisUlangEvent::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentCheck;
 
-    protected static ?string $recordTitleAttribute = 'RegisUlang';
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?string $navigationLabel = 'Regis Ulangs';
+
+    protected static ?string $pluralLabel = 'Regis Ulangs';
+
+    protected static ?string $label = 'Regis Ulang';
+
+    protected static ?string $slug = 'regis-ulangs';
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->can('ViewAny:RegisUlang') ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return false;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return false;
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -43,8 +70,6 @@ class RegisUlangResource extends Resource
     {
         return [
             'index' => ListRegisUlangs::route('/'),
-            'create' => CreateRegisUlang::route('/create'),
-            'edit' => EditRegisUlang::route('/{record}/edit'),
         ];
     }
 }

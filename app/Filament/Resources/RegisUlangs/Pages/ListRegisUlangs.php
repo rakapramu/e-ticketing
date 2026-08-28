@@ -61,7 +61,7 @@ class ListRegisUlangs extends ListRecords
             return;
         }
 
-        $order = Order::with('regisUlang', 'peserta')->where('order_code', $code)->first();
+        $order = Order::with(['regisUlang', 'peserta.user'])->where('order_code', $code)->first();
 
         if (!$order) {
             $result = ['success' => false, 'message' => 'Kode tidak ditemukan', 'name' => 'TIDAK DIKENAL'];
@@ -77,9 +77,11 @@ class ListRegisUlangs extends ListRecords
                 'waktu'    => Carbon::now()
             ]);
 
+            $pesertaName = $order->peserta?->user?->name ?? $order->peserta?->name_on_certificate ?? 'Peserta';
+
             $result = [
                 'success' => true,
-                'name' => $order->peserta->name,
+                'name' => $pesertaName,
                 'message' => 'Silakan Masuk Venue'
             ];
 
