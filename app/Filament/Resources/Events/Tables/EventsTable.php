@@ -44,6 +44,13 @@ class EventsTable
                 //
             ])
             ->recordActions([
+                \Filament\Tables\Actions\Action::make('qrCode')
+                    ->label('QR Event')
+                    ->icon('heroicon-o-qr-code')
+                    ->color('info')
+                    ->modalHeading(fn ($record) => 'QR Code - ' . $record->name)
+                    ->modalContent(fn ($record) => view('filament.pages.event-qr', ['record' => $record]))
+                    ->modalSubmitAction(false),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
