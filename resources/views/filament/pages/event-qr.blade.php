@@ -7,7 +7,7 @@
         Silakan gunakan menu <b>Self Checkin</b> pada aplikasi untuk memindai kode QR ini.
     </p>
     <div class="mt-8 flex gap-4">
-        <button type="button" onclick="window.print()" class="px-6 py-2 bg-blue-600 text-white rounded-lg font-bold shadow hover:bg-blue-700 transition">
+        <button type="button" onclick="window.print()" style="background-color: #3b82f6; color: white; padding: 0.5rem 1.5rem; border-radius: 0.5rem; font-weight: bold; border: none; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#2563eb'" onmouseout="this.style.backgroundColor='#3b82f6'">
             Cetak QR Code
         </button>
     </div>
