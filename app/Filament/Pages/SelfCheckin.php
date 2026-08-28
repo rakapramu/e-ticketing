@@ -15,7 +15,7 @@ class SelfCheckin extends Page
 {
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-camera';
 
-    protected static string $view = 'filament.pages.self-checkin';
+    protected string $view = 'filament.pages.self-checkin';
 
     protected static ?string $navigationLabel = 'Self Checkin';
     
