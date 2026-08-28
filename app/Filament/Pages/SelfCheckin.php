@@ -82,7 +82,7 @@ class SelfCheckin extends Page
         }
 
         // Cari atau buat Gate 'Self Checkin'
-        $gate = Gate::firstOrCreate(['name' => 'Self Checkin']);
+        $gate = Gate::firstOrCreate(['nama' => 'Self Checkin']);
 
         RegisUlang::create([
             'order_id' => $order->id,
